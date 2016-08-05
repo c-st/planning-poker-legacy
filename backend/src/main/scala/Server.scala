@@ -1,12 +1,12 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import services.EchoService
+import akka.http.scaladsl.server.Directives._
 
 import scala.io.StdIn
 
 object Server extends App {
-  import akka.http.scaladsl.server.Directives._
-
   implicit val actorSystem = ActorSystem("akka-system")
   implicit val flowMaterializer = ActorMaterializer()
 
@@ -17,7 +17,7 @@ object Server extends App {
   val route = get {
     pathEndOrSingleSlash {
       complete("Welcome to websocket server")
-    }
+    } ~ EchoService.route
   }
 
   val binding = Http().bindAndHandle(route, interface, port)
