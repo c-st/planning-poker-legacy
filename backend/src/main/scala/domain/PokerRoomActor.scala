@@ -17,8 +17,8 @@ class PokerRoomActor(roomId: Int) extends Actor {
       participants -= name
 
     case msg: IncomingMessage =>
-      broadcast(msg)
+      broadcast(PokerMessage(msg.sender, msg.message))
   }
 
-  def broadcast(message: PokerEvent): Unit = participants.values.foreach(_ ! message)
+  def broadcast(message: PokerMessage): Unit = participants.values.foreach(_ ! message)
 }

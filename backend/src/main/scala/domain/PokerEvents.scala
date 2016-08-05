@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 
 sealed trait PokerEvent
 
-case class PokerMessage(sender: String, text: String) extends PokerEvent
+case class PokerMessage(sender: String, text: String)
 
 object SystemMessage {
   def apply(text: String) = PokerMessage("System", text)
