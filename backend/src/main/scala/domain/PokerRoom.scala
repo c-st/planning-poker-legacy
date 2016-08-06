@@ -5,6 +5,9 @@ import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.{FlowShape, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Sink, Source}
 
+import scala.collection.immutable.Map
+import scala.util.parsing.json.JSON
+
 class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
   private[this] val pokerRoomActor = actorSystem.actorOf(
     Props(classOf[PokerRoomActor], roomId)
@@ -18,15 +21,16 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
 
         import GraphDSL.Implicits._
 
-        // flow used as input, it takes TextMessages
+        // Flow used as input, it takes TextMessages
         val fromWebsocket = builder.add(
           Flow[Message].collect {
-            case TextMessage.Strict(txt) => IncomingMessage(user, txt)
+            case TextMessage.Strict(textContent) => mapToPokerEvent(user, textContent)
           })
 
-        // flow used as output, it returns TextMessages
+        // Flow used as output, it returns TextMessages
         val backToWebsocket = builder.add(
           Flow[PokerMessage].map {
+            // TODO convert events to TextMessages (containing JSON)
             case PokerMessage(author, text) => TextMessage(s"[$author] $text")
           })
 
@@ -46,6 +50,20 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
   }
 
   def sendMessage(message: PokerMessage): Unit = pokerRoomActor ! message
+
+  private def mapToPokerEvent(user: String, textContent: String): PokerEvent = {
+    val incomingMessage = JSON.parseFull(textContent) match {
+      case Some(map: Map[_, Any]) => map.asInstanceOf[Map[String, Any]]
+      case _ => Map("id" -> "unknown")
+    }
+
+    val allKeys = incomingMessage.keys.toList
+    allKeys.flatMap(incomingMessage.get) match {
+      case "estimation" :: (value:String) :: Nil => IncomingEstimation(user, value)
+      case "showResult" :: Nil => ShowEstimationResult(user)
+      case _ => IncomingMessage(user, "fallback " + textContent)
+    }
+  }
 }
 
 object PokerRoom {

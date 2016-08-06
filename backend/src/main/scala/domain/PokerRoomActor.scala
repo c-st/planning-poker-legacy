@@ -8,6 +8,8 @@ class PokerRoomActor(roomId: Int) extends Actor {
   override def receive: Receive = {
     case UserJoined(name, actorRef) =>
       participants += name -> actorRef
+      // broadcast all previous estimations to actorRef
+      actorRef ! PokerMessage("System", "Hello and welcome!")
       broadcast(SystemMessage(s"User $name joined"))
       println(s"User $name joined channel[$roomId]")
 
@@ -15,6 +17,12 @@ class PokerRoomActor(roomId: Int) extends Actor {
       println(s"User $name left channel[$roomId]")
       broadcast(SystemMessage(s"User $name left channel[$roomId]"))
       participants -= name
+
+    case IncomingEstimation(name, estimation) =>
+      println(s"User $name estimated $estimation")
+
+    case ShowEstimationResult(name) =>
+      println(s"User $name asked to show result")
 
     case msg: IncomingMessage =>
       broadcast(PokerMessage(msg.sender, msg.message))
