@@ -2,7 +2,7 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
-import domain.PokerRooms
+import services.PlanningPokerService
 
 import scala.io.StdIn
 
@@ -17,11 +17,7 @@ object Server extends App {
   val route = get {
     pathEndOrSingleSlash {
       complete("Welcome to websocket server")
-    } ~ pathPrefix("poker" / IntNumber) { roomId =>
-      parameter('name) { userName =>
-        handleWebSocketMessages(PokerRooms.findOrCreate(roomId).websocketFlow(userName))
-      }
-    }
+    } ~ PlanningPokerService.route
   }
 
   val binding = Http().bindAndHandle(route, interface, port)
