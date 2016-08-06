@@ -2,10 +2,14 @@ name := """pp-backend"""
 
 version := "1.0"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.8"
 
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.4.8",
-  "com.typesafe.akka" %% "akka-http-core" % "2.4.8",
-  "com.typesafe.akka" %% "akka-http-experimental" % "2.4.8"
-)
+libraryDependencies ++= {
+  val akkaVersion = "2.4.8"
+
+  Seq(
+    "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-core" % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-experimental" % akkaVersion
+  )
+}
