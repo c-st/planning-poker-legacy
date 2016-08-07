@@ -5,6 +5,7 @@ import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import WebSocket
+import Json.Decode as JD exposing ((:=))
 
 
 main : Program Never
@@ -17,8 +18,8 @@ main =
         }
 
 
-echoServer : String
-echoServer =
+planningPokerServer : String
+planningPokerServer =
     "ws://localhost:8080/poker/1?name=Chris"
 
 
@@ -26,15 +27,21 @@ echoServer =
 -- model
 
 
+type alias User =
+    { name : String
+    }
+
+
 type alias Model =
     { input : String
     , messages : List String
+    , users : List User
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" [], Cmd.none )
+    ( Model "" [] [], Cmd.none )
 
 
 
@@ -44,20 +51,90 @@ init =
 type Msg
     = Input String
     | Send
-    | NewMessage String
+    | IncomingEvent String
+      -- is being decoded and mapped to these:
+    | UnexpectedPayload String
+    | UserJoined User
+    | UserLeft User
+
+
+containsUser : List User -> User -> Bool
+containsUser users user =
+    (users
+        |> List.filter (\u -> u.name == user.name)
+        |> List.length
+    )
+        > 0
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg { input, messages } =
+update msg { input, messages, users } =
     case msg of
         Input newInput ->
-            ( Model newInput messages, Cmd.none )
+            ( Model newInput messages users, Cmd.none )
 
         Send ->
-            ( Model "" messages, WebSocket.send echoServer input )
+            ( Model "" messages users, WebSocket.send planningPokerServer input )
 
-        NewMessage str ->
-            ( Model input (str :: messages), Cmd.none )
+        IncomingEvent payload ->
+            let
+                nextModel =
+                    (Model input messages users)
+
+                nextMessage =
+                    decodePayload payload
+            in
+                update nextMessage nextModel
+
+        UnexpectedPayload message ->
+            ( Model input messages users, Cmd.none )
+
+        UserJoined user ->
+            let
+                newUsers =
+                    if containsUser users user then
+                        users
+                    else
+                        user :: users
+            in
+                ( Model input messages newUsers, Cmd.none )
+
+        UserLeft user ->
+            let
+                newUsers =
+                    List.filter (\u -> u.name /= user.name) users
+            in
+                ( Model input messages newUsers, Cmd.none )
+
+
+
+-- decoding
+
+
+payloadDecoder : JD.Decoder Msg
+payloadDecoder =
+    ("eventType" := JD.string)
+        `JD.andThen`
+            \eventType ->
+                case eventType of
+                    "userJoined" ->
+                        JD.map UserJoined (JD.object1 User ("name" := JD.string))
+
+                    "userLeft" ->
+                        JD.map UserLeft (JD.object1 User ("name" := JD.string))
+
+                    _ ->
+                        JD.fail (eventType ++ " is not a recognized event type")
+
+
+decodePayload : String -> Msg
+decodePayload payload =
+    case JD.decodeString payloadDecoder payload of
+        Err err ->
+            UnexpectedPayload err
+
+        Ok msg ->
+            msg
 
 
 
@@ -66,7 +143,7 @@ update msg { input, messages } =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen echoServer NewMessage
+    WebSocket.listen planningPokerServer IncomingEvent
 
 
 
@@ -78,10 +155,10 @@ view model =
     div []
         [ input [ onInput Input, value model.input ] []
         , button [ onClick Send ] [ text "Send" ]
-        , div [] (List.map viewMessage (List.reverse model.messages))
+        , ul [] (List.map viewUser model.users)
         ]
 
 
-viewMessage : String -> Html msg
-viewMessage msg =
-    div [] [ text msg ]
+viewUser : User -> Html msg
+viewUser user =
+    li [] [ text user.name ]
