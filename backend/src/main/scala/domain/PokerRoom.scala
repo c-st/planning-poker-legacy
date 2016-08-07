@@ -7,6 +7,7 @@ import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Sink, Source}
 
 import scala.collection.immutable.Map
 import scala.util.parsing.json.JSON
+import com.owlike.genson.defaultGenson._
 
 class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
   private[this] val pokerRoomActor = actorSystem.actorOf(
@@ -64,10 +65,9 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
   }
 
   private def mapPokerEventToTextMessage(pokerEvent: PokerEvent): TextMessage = {
-    pokerEvent match { // TODO encode to JSON
-      case UserJoined(name, _) => TextMessage(s"$name joined")
-      case UserLeft(name) => TextMessage(s"$name left")
-
+    pokerEvent match {
+      case UserJoined(name, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
+      case UserLeft(name, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserLeft]))
       case IncomingMessage(sender, message) => TextMessage(s"[$sender] $message")
     }
   }

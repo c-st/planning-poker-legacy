@@ -10,7 +10,7 @@ class PokerRoomActor(roomId: Int) extends Actor {
   var estimations: Map[String, Map[String, Int]] = Map.empty[String, Map[String, Int]]
 
   override def receive: Receive = {
-    case UserJoined(name, actorRef) =>
+    case UserJoined(name, actorRef, _) =>
       broadcast(UserJoined(name, actorRef))
       participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
       participants += name -> actorRef
@@ -18,23 +18,26 @@ class PokerRoomActor(roomId: Int) extends Actor {
       // broadcast all previous estimations to actorRef
       // actorRef ! PokerMessage("System", "Hello and welcome!")
       // broadcast(SystemMessage(s"User $name joined"))
-      println(s"User $name joined channel[$roomId]")
+      println(s"[$roomId] User $name joined room")
 
-    case UserLeft(name) =>
+    case UserLeft(name, _) =>
       broadcast(UserLeft(name))
-      println(s"User $name left channel[$roomId]")
+      println(s"[$roomId] User $name left room")
       participants -= name
       if (participants.isEmpty) {
-        println(s"Channel $roomId is now empty.")
+        println(s"[$roomId] Room is now empty.")
       }
 
-    case IncomingEstimation(name, estimation) =>
-      println(s"User $name estimated $estimation")
+    case IncomingEstimation(name, estimation, _) =>
+      println(s"[$roomId] User $name estimated $estimation for $currentTask")
+      // TODO save estimation
 
-    case ShowEstimationResult(name) =>
-      println(s"User $name asked to show result")
+    case ShowEstimationResult(name, _) =>
+      println(s"[$roomId] User $name asked to show result")
+      // TODO broadcast all estimations for current task
 
     case msg: IncomingMessage =>
+      println(s"[$roomId] Received unknown incoming message $msg")
       // broadcast(PokerMessage(msg.sender, msg.message))
   }
 
@@ -42,6 +45,4 @@ class PokerRoomActor(roomId: Int) extends Actor {
 
   private def allActors: List[ActorRef] = participants.keys.toList.flatMap(participants.get)
   private def previousEstimations: Map[String, Map[String, Int]] = estimations.filter(_._1 != currentTask)
-
-
 }
