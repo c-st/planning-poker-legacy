@@ -1,4 +1,7 @@
-activator-akka-scala-seed
-=========================
+# Planning poker backend
+==============
 
-A minimal seed template for an Akka with Scala build 
+Planning poker backend built on Akka HTTP.
+
+## Getting started
+`sbt run`
