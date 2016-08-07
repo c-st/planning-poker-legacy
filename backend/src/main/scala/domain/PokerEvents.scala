@@ -9,11 +9,10 @@ object SystemMessage {
 }
 
 sealed trait PokerEvent
-
-case class UserJoined(name: String, userActor: ActorRef) extends PokerEvent
-case class UserLeft(name: String) extends PokerEvent
-
 case class IncomingMessage(sender: String, message: String) extends PokerEvent
 
-case class IncomingEstimation(sender: String, estimation: String) extends PokerEvent
-case class ShowEstimationResult(sender: String) extends PokerEvent
+case class UserJoined(name: String, userActor: ActorRef, id: String = "userJoined") extends PokerEvent
+case class UserLeft(name: String, id: String = "userLeft") extends PokerEvent
+
+case class IncomingEstimation(sender: String, estimation: String, id: String = "estimation") extends PokerEvent
+case class ShowEstimationResult(sender: String, id: String = "showResult") extends PokerEvent

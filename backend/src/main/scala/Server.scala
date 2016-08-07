@@ -4,7 +4,7 @@ import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import services.PlanningPokerService
 
-import scala.io.StdIn
+import scala.util.{Failure, Success}
 
 object Server extends App {
   implicit val actorSystem = ActorSystem("akka-system")
@@ -20,12 +20,14 @@ object Server extends App {
     } ~ PlanningPokerService.route
   }
 
-  val binding = Http().bindAndHandle(route, interface, port)
-  println(s"Server is now online at http://$interface:$port\nPress RETURN to stop...")
-  StdIn.readLine()
-
   import actorSystem.dispatcher
 
-  binding.flatMap(_.unbind()).onComplete(_ => actorSystem.terminate())
-  println("Server is down...")
+  val binding = Http().bindAndHandle(route, interface, port)
+  binding.onComplete {
+    case Success(binding) =>
+      println(s"Server is now running at http://$interface:$port")
+    case Failure(e) =>
+      println(s"Binding failed with ${e.getMessage}")
+      actorSystem.terminate()
+  }
 }
