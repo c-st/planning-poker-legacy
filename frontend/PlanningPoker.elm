@@ -58,6 +58,15 @@ type Msg
     | UserLeft User
 
 
+containsUser : List User -> User -> Bool
+containsUser users user =
+    (users
+        |> List.filter (\u -> u.name == user.name)
+        |> List.length
+    )
+        > 0
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg { input, messages, users } =
     case msg of
@@ -81,7 +90,14 @@ update msg { input, messages, users } =
             ( Model input messages users, Cmd.none )
 
         UserJoined user ->
-            ( Model input messages (user :: users), Cmd.none )
+            let
+                newUsers =
+                    if containsUser users user then
+                        users
+                    else
+                        user :: users
+            in
+                ( Model input messages newUsers, Cmd.none )
 
         UserLeft user ->
             let
