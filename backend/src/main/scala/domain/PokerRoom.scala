@@ -52,10 +52,11 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
   private def mapToPokerEvent(user: String, textContent: String): PokerEvent = {
     val incomingMessage = JSON.parseFull(textContent) match {
       case Some(map: Map[_, Any]) => map.asInstanceOf[Map[String, Any]]
-      case _ => Map("id" -> "unknown")
+      case _ => Map("eventType" -> "unknown")
     }
 
     val allKeys = incomingMessage.keys.toList
+    // what about the order of elements in JSON structure?!
 
     allKeys.flatMap(incomingMessage.get) match {
       case "estimation" :: (value: String) :: Nil => IncomingEstimation(user, value)
