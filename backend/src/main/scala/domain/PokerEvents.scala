@@ -12,7 +12,6 @@ sealed trait PokerEvent
 
 case class UserJoined(name: String, userActor: ActorRef) extends PokerEvent
 case class UserLeft(name: String) extends PokerEvent
-
 case class IncomingMessage(sender: String, message: String) extends PokerEvent
 
 case class IncomingEstimation(sender: String, estimation: String) extends PokerEvent

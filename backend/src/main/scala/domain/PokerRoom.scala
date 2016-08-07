@@ -14,25 +14,22 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
   )
 
   def websocketFlow(user: String): Flow[Message, Message, _] = {
-    val source = Source.actorRef[PokerMessage](1, OverflowStrategy.fail)
+    val source = Source.actorRef[PokerEvent](1, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
       implicit builder => { (responseSource) =>
 
         import GraphDSL.Implicits._
 
-        // Flow used as input, it takes TextMessages
+        // TextMessage -> PokerEvent
         val fromWebsocket = builder.add(
           Flow[Message].collect {
             case TextMessage.Strict(textContent) => mapToPokerEvent(user, textContent)
           })
 
-        // Flow used as output, it returns TextMessages
+        // PokerEvent -> TextMessage
         val backToWebsocket = builder.add(
-          Flow[PokerMessage].map {
-            // TODO convert events to TextMessages (containing JSON)
-            case PokerMessage(author, text) => TextMessage(s"[$author] $text")
-          })
+          Flow[PokerEvent].map(mapPokerEventToTextMessage))
 
         val pokerRoomActorSink = Sink.actorRef[PokerEvent](pokerRoomActor, UserLeft(user))
         val merge = builder.add(Merge[PokerEvent](2))
@@ -58,10 +55,20 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
     }
 
     val allKeys = incomingMessage.keys.toList
+
     allKeys.flatMap(incomingMessage.get) match {
-      case "estimation" :: (value:String) :: Nil => IncomingEstimation(user, value)
+      case "estimation" :: (value: String) :: Nil => IncomingEstimation(user, value)
       case "showResult" :: Nil => ShowEstimationResult(user)
-      case _ => IncomingMessage(user, "fallback " + textContent)
+      case _ => IncomingMessage(user, "unknown event: " + textContent)
+    }
+  }
+
+  private def mapPokerEventToTextMessage(pokerEvent: PokerEvent): TextMessage = {
+    pokerEvent match { // TODO encode to JSON
+      case UserJoined(name, _) => TextMessage(s"$name joined")
+      case UserLeft(name) => TextMessage(s"$name left")
+
+      case IncomingMessage(sender, message) => TextMessage(s"[$sender] $message")
     }
   }
 }
