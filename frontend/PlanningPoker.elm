@@ -1,11 +1,13 @@
 module Main exposing (..)
 
+import String exposing (isEmpty)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import RouteUrl.Builder as Builder exposing (Builder, builder, path, replacePath)
 import RouteUrl exposing (UrlChange)
 import Navigation exposing (Location)
+import Platform.Sub exposing (none)
 import WebSocket
 import Json.Decode as JD exposing ((:=))
 
@@ -20,11 +22,6 @@ main =
         , delta2url = delta2url
         , location2messages = url2messages
         }
-
-
-planningPokerServer : String
-planningPokerServer =
-    "ws://localhost:8080/poker/1?name=Chris"
 
 
 
@@ -44,6 +41,7 @@ type alias User =
 type alias Model =
     { activePage : Page
     , roomId : String
+    , roomJoined : Bool
     , input : String
     , messages : List String
     , users : List User
@@ -52,7 +50,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" "" [] [], Cmd.none )
+    ( Model LandingPage "" False "" [] [], Cmd.none )
 
 
 
@@ -64,6 +62,7 @@ type Msg
     | Send
     | SetRoomId String
     | JoinRoom
+    | LeaveRoom
     | IncomingEvent String
       -- is being decoded and mapped to these:
     | UnexpectedPayload String
@@ -91,19 +90,25 @@ update msg model =
             )
 
         Send ->
-            ( model, WebSocket.send planningPokerServer model.input )
+            ( model, WebSocket.send (planningPokerServer "Chris" model.roomId) model.input )
 
+        -- use proper URL instead of ""
         SetRoomId newRoomId ->
-            ( { model
-                | roomId = newRoomId
-              }
-            , Cmd.none
-            )
+            ( { model | roomId = newRoomId }, Cmd.none )
 
         JoinRoom ->
-            ( model, Cmd.none )
+            let
+                newPage =
+                    if String.isEmpty model.roomId then
+                        LandingPage
+                    else
+                        PlanningPokerRoom
+            in
+                ( { model | roomJoined = True, activePage = newPage }, Cmd.none )
 
-        -- reestablish connection
+        LeaveRoom ->
+            ( { model | roomJoined = False, roomId = "", activePage = LandingPage }, Cmd.none )
+
         IncomingEvent payload ->
             let
                 nextMessage =
@@ -168,7 +173,23 @@ decodePayload payload =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen planningPokerServer IncomingEvent
+    case model.roomJoined of
+        True ->
+            let
+                serverUrl =
+                    planningPokerServer "Chris" model.roomId
+
+                --"ws://localhost:8080/poker/1?name=Chris"
+            in
+                WebSocket.listen serverUrl IncomingEvent
+
+        False ->
+            Platform.Sub.none
+
+
+planningPokerServer : String -> String -> String
+planningPokerServer user room =
+    "ws://localhost:8080/poker/" ++ room ++ "?name=Chris"
 
 
 
@@ -210,9 +231,36 @@ builder2messages builder =
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ onInput SetRoomId, value model.roomId ] []
+        [ mainContent model ]
+
+
+mainContent : Model -> Html Msg
+mainContent model =
+    case model.activePage of
+        LandingPage ->
+            div [] [ landingPageContent model ]
+
+        PlanningPokerRoom ->
+            div [] [ pokerRoomPageContent model ]
+
+
+landingPageContent : Model -> Html Msg
+landingPageContent model =
+    div []
+        [ h3 [] [ text ("roomId: " ++ model.roomId) ]
+        , input [ onInput SetRoomId, value model.roomId ] []
         , button [ onClick JoinRoom ] [ text "Join room" ]
-        , h3 [] [ text ("roomId: " ++ model.roomId) ]
+        ]
+
+
+
+-- show input for name when roomId is set but room is not joined
+
+
+pokerRoomPageContent : Model -> Html Msg
+pokerRoomPageContent model =
+    div []
+        [ button [ onClick LeaveRoom ] [ text "Leave room" ]
         , input [ onInput Input, value model.input ] []
         , button [ onClick Send ] [ text "Send" ]
         , ul [] (List.map viewUser model.users)
