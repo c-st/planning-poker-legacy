@@ -92,7 +92,6 @@ update msg model =
         Send ->
             ( model, WebSocket.send (planningPokerServer "Chris" model.roomId) model.input )
 
-        -- use proper URL instead of ""
         SetRoomId newRoomId ->
             ( { model | roomId = newRoomId }, Cmd.none )
 
@@ -178,8 +177,6 @@ subscriptions model =
             let
                 serverUrl =
                     planningPokerServer "Chris" model.roomId
-
-                --"ws://localhost:8080/poker/1?name=Chris"
             in
                 WebSocket.listen serverUrl IncomingEvent
 
