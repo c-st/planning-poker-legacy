@@ -3,7 +3,7 @@ package domain
 import akka.actor.{Actor, ActorRef}
 import scala.collection.immutable.Map
 
-class PokerRoomActor(roomId: Int) extends Actor {
+class PokerRoomActor(roomId: String) extends Actor {
   type Estimations = Map[String, Map[String, String]]
 
   var participants: Map[String, ActorRef] = Map.empty[String, ActorRef]
@@ -49,8 +49,10 @@ class PokerRoomActor(roomId: Int) extends Actor {
 
     case RequestShowEstimationResult(name, _) =>
       println(s"[$roomId] User $name asked to show result")
-      if (outstandingEstimations.nonEmpty) {
-        println(s"[$roomId] there are still users that need to estimate!")
+      if (currentTask.isEmpty) {
+        println(s"[$roomId] No estimation is started yet.")
+      } else if (outstandingEstimations.nonEmpty) {
+        println(s"[$roomId] There are still users that need to estimate!")
       } else {
         val estimates = estimations.getOrElse(currentTask, Map.empty[String, String])
         println(s"[$roomId] finishing estimation with result: $estimates")

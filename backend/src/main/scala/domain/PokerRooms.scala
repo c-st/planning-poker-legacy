@@ -3,12 +3,12 @@ package domain
 import akka.actor.ActorSystem
 
 object PokerRooms {
-  var pokerRooms: Map[Int, PokerRoom] = Map.empty[Int, PokerRoom]
+  var pokerRooms: Map[String, PokerRoom] = Map.empty[String, PokerRoom]
 
-  def findOrCreate(roomId: Int)(implicit actorSystem: ActorSystem): PokerRoom =
+  def findOrCreate(roomId: String)(implicit actorSystem: ActorSystem): PokerRoom =
     pokerRooms.getOrElse(roomId, createNewPokerRoom(roomId))
 
-  private def createNewPokerRoom(roomId: Int)(implicit actorSystem: ActorSystem): PokerRoom = {
+  private def createNewPokerRoom(roomId: String)(implicit actorSystem: ActorSystem): PokerRoom = {
     val pokerRoom = PokerRoom(roomId)
     pokerRooms += roomId -> pokerRoom
     pokerRoom

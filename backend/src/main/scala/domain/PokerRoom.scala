@@ -9,7 +9,7 @@ import scala.collection.immutable.Map
 import scala.util.parsing.json.JSON
 import com.owlike.genson.defaultGenson._
 
-class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
+class PokerRoom(roomId: String, actorSystem: ActorSystem) {
   private[this] val pokerRoomActor = actorSystem.actorOf(
     Props(classOf[PokerRoomActor], roomId)
   )
@@ -77,5 +77,5 @@ class PokerRoom(roomId: Int, actorSystem: ActorSystem) {
 }
 
 object PokerRoom {
-  def apply(roomId: Int)(implicit actorSystem: ActorSystem) = new PokerRoom(roomId, actorSystem)
+  def apply(roomId: String)(implicit actorSystem: ActorSystem) = new PokerRoom(roomId, actorSystem)
 }
