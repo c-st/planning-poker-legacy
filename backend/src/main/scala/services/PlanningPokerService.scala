@@ -6,7 +6,7 @@ import akka.http.scaladsl.server._
 import domain.PokerRooms
 
 object PlanningPokerService {
-  def route(implicit actorSystem: ActorSystem): Route = pathPrefix("poker" / IntNumber) { roomId =>
+  def route(implicit actorSystem: ActorSystem): Route = pathPrefix("poker" / """[a-zA-Z0-9]{2,10}""".r) { roomId =>
     parameter('name) { userName =>
       handleWebSocketMessages(PokerRooms.findOrCreate(roomId).websocketFlow(userName))
     }
