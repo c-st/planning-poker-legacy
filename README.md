@@ -20,9 +20,17 @@
 Clients keep a list of all other users currently estimating. The event when a user joins or leaves the room is broadcasted to all other participants.
 
 `ParticipantJoined (name)`
+
 `ParticipantLeft (name)`
 
 When a new user joins into a room already filled with users, he/she receives information about all other users through multiple `ParticipantJoined` events.
+
+### Estimation
+
+Clients send their estimation to the server. The server collects incoming estimations and broadcasts the result once all users in the rooms have submitted their estimation.
+
+Estimation is done by sending a `StartEstimation (task)` event to the clients. All clients, also those that connect in the meanwhile receive this event after they have received the user list. When the task to estimate is set on client side, they show buttons that represent the different complexities.
+When all clients have submitted their estimations, the server broadcasts the result to all clients (clients receive the estimations of all other users).
 
 ### Moderation
 
