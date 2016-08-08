@@ -2,7 +2,7 @@ package domain
 
 import akka.actor.{Actor, ActorRef}
 
-class PokerRoomActor(roomId: Int) extends Actor {
+class PokerRoomActor(roomId: String) extends Actor {
   var participants: Map[String, ActorRef] = Map.empty[String, ActorRef]
   var moderator: String = ""
 
