@@ -44,13 +44,14 @@ type alias Model =
     , roomJoined : Bool
     , input : String
     , messages : List String
+    , user : User
     , users : List User
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" False "" [] [], Cmd.none )
+    ( Model LandingPage "" False "" [] (User "") [], Cmd.none )
 
 
 
@@ -60,6 +61,7 @@ init =
 type Msg
     = Input String
     | Send
+    | SetUserName String
     | SetRoomId String
     | JoinRoom
     | LeaveRoom
@@ -79,18 +81,22 @@ containsUser users user =
         > 0
 
 
+sufficientInfo : Model -> Bool
+sufficientInfo model =
+    not (String.isEmpty model.roomId) && not (String.isEmpty model.user.name)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Input newInput ->
-            ( { model
-                | input = newInput
-              }
-            , Cmd.none
-            )
+            ( { model | input = newInput }, Cmd.none )
 
         Send ->
-            ( model, WebSocket.send (planningPokerServer "Chris" model.roomId) model.input )
+            ( model, WebSocket.send (planningPokerServer model.user model.roomId) model.input )
+
+        SetUserName newName ->
+            ( { model | user = User newName }, Cmd.none )
 
         SetRoomId newRoomId ->
             ( { model | roomId = newRoomId }, Cmd.none )
@@ -98,12 +104,12 @@ update msg model =
         JoinRoom ->
             let
                 newPage =
-                    if String.isEmpty model.roomId then
+                    if not (sufficientInfo model) then
                         LandingPage
                     else
                         PlanningPokerRoom
             in
-                ( { model | roomJoined = True, activePage = newPage }, Cmd.none )
+                ( { model | roomJoined = sufficientInfo model, activePage = newPage, users = [] }, Cmd.none )
 
         LeaveRoom ->
             ( { model | roomJoined = False, roomId = "", activePage = LandingPage }, Cmd.none )
@@ -176,7 +182,7 @@ subscriptions model =
         True ->
             let
                 serverUrl =
-                    planningPokerServer "Chris" model.roomId
+                    planningPokerServer model.user model.roomId
             in
                 WebSocket.listen serverUrl IncomingEvent
 
@@ -184,9 +190,9 @@ subscriptions model =
             Platform.Sub.none
 
 
-planningPokerServer : String -> String -> String
+planningPokerServer : User -> String -> String
 planningPokerServer user room =
-    "ws://localhost:8080/poker/" ++ room ++ "?name=Chris"
+    ("ws://localhost:8080/poker/" ++ room ++ "?name=" ++ user.name)
 
 
 
@@ -244,20 +250,19 @@ mainContent model =
 landingPageContent : Model -> Html Msg
 landingPageContent model =
     div []
-        [ h3 [] [ text ("roomId: " ++ model.roomId) ]
+        [ h3 [] [ text ("userName: " ++ model.user.name) ]
+        , input [ onInput SetUserName, value model.user.name ] []
+        , h3 [] [ text ("roomId: " ++ model.roomId) ]
         , input [ onInput SetRoomId, value model.roomId ] []
         , button [ onClick JoinRoom ] [ text "Join room" ]
         ]
 
 
-
--- show input for name when roomId is set but room is not joined
-
-
 pokerRoomPageContent : Model -> Html Msg
 pokerRoomPageContent model =
     div []
-        [ button [ onClick LeaveRoom ] [ text "Leave room" ]
+        [ h3 [] [ text ("userName: " ++ model.user.name) ]
+        , button [ onClick LeaveRoom ] [ text "Leave room" ]
         , input [ onInput Input, value model.input ] []
         , button [ onClick Send ] [ text "Send" ]
         , ul [] (List.map viewUser model.users)
