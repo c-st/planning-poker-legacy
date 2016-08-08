@@ -19,7 +19,7 @@ class PokerRoomActor(roomId: Int) extends Actor {
       if (!currentTask.isEmpty) {
         actorRef ! RequestStartEstimation(moderator, currentTask)
       }
-      // broadcast all previous estimations to actorRef
+      // TODO: fill history. broadcast all previous estimations to actorRef
       participants += name -> actorRef
       println(s"[$roomId] User $name joined room")
 
@@ -33,6 +33,7 @@ class PokerRoomActor(roomId: Int) extends Actor {
 
     case RequestStartEstimation(name, taskName, _) =>
       println(s"[$roomId] $name initiated an estimation for '$taskName'")
+      estimations = removeTaskEstimations(taskName)
       currentTask = taskName
       broadcast(RequestStartEstimation(name, taskName))
 
@@ -43,6 +44,7 @@ class PokerRoomActor(roomId: Int) extends Actor {
         estimations = insertEstimation((name, estimation))
         println(s"[$roomId] User $name estimated $estimation for $currentTask")
         broadcast(UserHasEstimated(name, taskName))
+        if (outstandingEstimations.isEmpty) println(s"[$roomId] All users have estimated! $currentEstimations")
       }
 
     case RequestShowEstimationResult(name, _) =>
@@ -65,12 +67,15 @@ class PokerRoomActor(roomId: Int) extends Actor {
 
   private def allActors: List[ActorRef] = participants.keys.toList.flatMap(participants.get)
   private def previousEstimations: Estimations = estimations.filter(_._1 != currentTask)
+  private def currentEstimations: Map[String, String] = estimations.getOrElse(currentTask, Map.empty[String, String])
   private def outstandingEstimations : Map[String, ActorRef] = {
-    // outstanding estimations for current task. find all users that haven't estimated
-    ???
+    participants.filter(p => !currentEstimations.keys.toList.contains(p._1))
   }
   private def insertEstimation(estimation: (String, String)) : Estimations = {
-    // insert new estimation overwriting existing one
-    ???
+    val newEstimations = currentEstimations - estimation._1 + (estimation._1 -> estimation._2)
+    estimations - currentTask + (currentTask -> newEstimations)
+  }
+  private def removeTaskEstimations(taskName: String) : Estimations = {
+    estimations - currentTask
   }
 }
