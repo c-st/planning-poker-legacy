@@ -51,13 +51,13 @@ type alias Model =
     , messages : List String
     , user : User
     , users : List User
-    , currentTask : Task
+    , currentTask : Maybe Task
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" False "" [] (User "") [] (Task ""), Cmd.none )
+    ( Model LandingPage "" False "" [] (User "") [] Nothing, Cmd.none )
 
 
 
@@ -119,7 +119,7 @@ update msg model =
                 ( { model | roomJoined = sufficientInfo model, activePage = newPage, users = [] }, Cmd.none )
 
         LeaveRoom ->
-            ( { model | roomJoined = False, roomId = "", activePage = LandingPage }, Cmd.none )
+            ( { model | roomJoined = False, roomId = "", currentTask = Nothing, activePage = LandingPage }, Cmd.none )
 
         IncomingEvent payload ->
             let
@@ -149,7 +149,7 @@ update msg model =
                 ( { model | users = newUsers }, Cmd.none )
 
         StartEstimation task ->
-            ( { model | currentTask = task }, Cmd.none )
+            ( { model | currentTask = Just task }, Cmd.none )
 
 
 
@@ -273,14 +273,21 @@ landingPageContent model =
 
 pokerRoomPageContent : Model -> Html Msg
 pokerRoomPageContent model =
-    div []
-        [ h3 [] [ text ("userName: " ++ model.user.name) ]
-        , button [ onClick LeaveRoom ] [ text "Leave room" ]
-        , h3 [] [ text ("currentTask: " ++ model.currentTask.name) ]
-        , input [ onInput Input, value model.input ] []
-        , button [ onClick Send ] [ text "Send" ]
-        , ul [] (List.map viewUser model.users)
-        ]
+    let
+        userName =
+            model.user.name
+
+        task =
+            Maybe.withDefault (Task "") model.currentTask
+    in
+        div []
+            [ h3 [] [ text ("userName: " ++ userName) ]
+            , button [ onClick LeaveRoom ] [ text "Leave room" ]
+            , h3 [] [ text ("currentTask: " ++ task.name) ]
+            , input [ onInput Input, value model.input ] []
+            , button [ onClick Send ] [ text "Send" ]
+            , ul [] (List.map viewUser model.users)
+            ]
 
 
 viewUser : User -> Html msg
