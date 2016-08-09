@@ -38,6 +38,11 @@ type alias User =
     }
 
 
+type alias Task =
+    { name : String
+    }
+
+
 type alias Model =
     { activePage : Page
     , roomId : String
@@ -46,12 +51,13 @@ type alias Model =
     , messages : List String
     , user : User
     , users : List User
+    , currentTask : Task
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" False "" [] (User "") [], Cmd.none )
+    ( Model LandingPage "" False "" [] (User "") [] (Task ""), Cmd.none )
 
 
 
@@ -70,6 +76,7 @@ type Msg
     | UnexpectedPayload String
     | UserJoined User
     | UserLeft User
+    | StartEstimation Task
 
 
 containsUser : List User -> User -> Bool
@@ -141,6 +148,9 @@ update msg model =
             in
                 ( { model | users = newUsers }, Cmd.none )
 
+        StartEstimation task ->
+            ( { model | currentTask = task }, Cmd.none )
+
 
 
 -- decoding
@@ -157,6 +167,9 @@ payloadDecoder =
 
                     "userLeft" ->
                         JD.map UserLeft (JD.object1 User ("name" := JD.string))
+
+                    "startEstimation" ->
+                        JD.map StartEstimation (JD.object1 Task ("taskName" := JD.string))
 
                     _ ->
                         JD.fail (eventType ++ " is not a recognized event type")
@@ -263,6 +276,7 @@ pokerRoomPageContent model =
     div []
         [ h3 [] [ text ("userName: " ++ model.user.name) ]
         , button [ onClick LeaveRoom ] [ text "Leave room" ]
+        , h3 [] [ text ("currentTask: " ++ model.currentTask.name) ]
         , input [ onInput Input, value model.input ] []
         , button [ onClick Send ] [ text "Send" ]
         , ul [] (List.map viewUser model.users)
