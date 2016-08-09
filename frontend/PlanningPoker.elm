@@ -35,6 +35,8 @@ type Page
 
 type alias User =
     { name : String
+    , hasEstimated : Bool
+    , estimation : Maybe String
     }
 
 
@@ -57,7 +59,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" False "" [] (User "") [] Nothing, Cmd.none )
+    ( Model LandingPage "" False "" [] (User "" False Nothing) [] Nothing, Cmd.none )
 
 
 
@@ -103,7 +105,7 @@ update msg model =
             ( model, WebSocket.send (planningPokerServer model.user model.roomId) model.input )
 
         SetUserName newName ->
-            ( { model | user = User newName }, Cmd.none )
+            ( { model | user = (User newName False Nothing) }, Cmd.none )
 
         SetRoomId newRoomId ->
             ( { model | roomId = newRoomId }, Cmd.none )
@@ -163,10 +165,20 @@ payloadDecoder =
             \eventType ->
                 case eventType of
                     "userJoined" ->
-                        JD.map UserJoined (JD.object1 User ("name" := JD.string))
+                        JD.map UserJoined
+                            (JD.object3 User
+                                ("name" := JD.string)
+                                (JD.succeed False)
+                                (JD.succeed Nothing)
+                            )
 
                     "userLeft" ->
-                        JD.map UserLeft (JD.object1 User ("name" := JD.string))
+                        JD.map UserLeft
+                            (JD.object3 User
+                                ("name" := JD.string)
+                                (JD.succeed False)
+                                (JD.succeed Nothing)
+                            )
 
                     "startEstimation" ->
                         JD.map StartEstimation (JD.object1 Task ("taskName" := JD.string))
