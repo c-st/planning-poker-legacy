@@ -38,6 +38,19 @@ payloadDecoder =
                                 (JD.succeed Nothing)
                             )
 
+                    "estimationResult" ->
+                        JD.map EstimationResult
+                            (JD.at
+                                [ "estimates" ]
+                                (JD.list
+                                    (JD.object3 User
+                                        ("userName" := JD.string)
+                                        (JD.succeed True)
+                                        (JD.maybe ("estimate" := JD.string))
+                                    )
+                                )
+                            )
+
                     _ ->
                         JD.fail (eventType ++ " is not a recognized event type")
 

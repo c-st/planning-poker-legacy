@@ -119,3 +119,10 @@ update msg model =
                     List.map (replaceUser user) model.users
             in
                 ( { model | users = updatedUsers }, Cmd.none )
+
+        EstimationResult users ->
+            let
+                filteredUsers =
+                    List.filter (\u -> u.name /= model.user.name) users
+            in
+                ( { model | users = filteredUsers }, Cmd.none )
