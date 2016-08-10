@@ -18,4 +18,6 @@ case class RequestStartEstimation(userName: String, taskName: String, eventType:
 case class UserEstimate(userName: String, taskName: String, estimate: String, eventType: String = "estimate") extends PokerEvent
 case class UserHasEstimated(userName: String, taskName: String, eventType: String = "userHasEstimated") extends PokerEvent
 case class RequestShowEstimationResult(userName: String, eventType: String = "showResult") extends PokerEvent
-case class EstimationResult(taskName: String, estimates: Map[String, String], eventType: String = "estimationResult") extends PokerEvent
+case class EstimationResult(taskName: String, estimates: List[UserEstimation], eventType: String = "estimationResult") extends PokerEvent
+
+case class UserEstimation(userName: String, estimate: String)

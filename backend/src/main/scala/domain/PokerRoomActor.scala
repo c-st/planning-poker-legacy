@@ -56,7 +56,11 @@ class PokerRoomActor(roomId: String) extends Actor {
       } else {
         val estimates = estimations.getOrElse(currentTask, Map.empty[String, String])
         println(s"[$roomId] finishing estimation with result: $estimates")
-        broadcast(EstimationResult(currentTask, estimates))
+
+        val estimatesList = estimates.keys.toList.map(userName =>
+          UserEstimation(userName, estimates.getOrElse(userName, "")))
+        
+        broadcast(EstimationResult(currentTask, estimatesList))
         currentTask = ""
       }
 
