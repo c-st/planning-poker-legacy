@@ -10,6 +10,7 @@ import Navigation exposing (Location)
 import Platform.Sub exposing (none)
 import WebSocket
 import Json.Decode as JD exposing ((:=))
+import Json.Encode as JE exposing (encode)
 
 
 main : Program Never
@@ -79,6 +80,13 @@ type Msg
     | UserJoined User
     | UserLeft User
     | StartEstimation Task
+      -- Messages that trigger outgoing messages:
+    | PerformEstimation String
+
+
+emptyUser : User
+emptyUser =
+    User "" False (Just "")
 
 
 containsUser : List User -> User -> Bool
@@ -102,7 +110,28 @@ update msg model =
             ( { model | input = newInput }, Cmd.none )
 
         Send ->
-            ( model, WebSocket.send (planningPokerServer model.user model.roomId) model.input )
+            ( model
+            , WebSocket.send
+                (planningPokerServer model.user model.roomId)
+                (userEstimationEncoded model.user (Maybe.withDefault (Task "") model.currentTask))
+            )
+
+        PerformEstimation estimate ->
+            let
+                user =
+                    model.user
+
+                task =
+                    Maybe.withDefault (Task "") model.currentTask
+
+                updatedUser =
+                    { user | hasEstimated = True, estimation = Just estimate }
+            in
+                ( { model | user = updatedUser }
+                , WebSocket.send
+                    (planningPokerServer model.user model.roomId)
+                    (userEstimationEncoded updatedUser task)
+                )
 
         SetUserName newName ->
             ( { model | user = (User newName False Nothing) }, Cmd.none )
@@ -195,6 +224,22 @@ decodePayload payload =
 
         Ok msg ->
             msg
+
+
+userEstimationEncoded : User -> Task -> String
+userEstimationEncoded user task =
+    let
+        estimation =
+            Maybe.withDefault "" user.estimation
+
+        list =
+            [ ( "eventType", JE.string "estimate" )
+            , ( "userName", JE.string user.name )
+            , ( "taskName", JE.string task.name )
+            , ( "estimate", JE.string estimation )
+            ]
+    in
+        list |> JE.object |> JE.encode 0
 
 
 
@@ -296,6 +341,11 @@ pokerRoomPageContent model =
             [ h3 [] [ text ("userName: " ++ userName) ]
             , button [ onClick LeaveRoom ] [ text "Leave room" ]
             , h3 [] [ text ("currentTask: " ++ task.name) ]
+            , div []
+                [ button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
+                , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
+                , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
+                ]
             , input [ onInput Input, value model.input ] []
             , button [ onClick Send ] [ text "Send" ]
             , ul [] (List.map viewUser model.users)
