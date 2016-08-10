@@ -14,7 +14,7 @@ payloadDecoder =
                     "userJoined" ->
                         JD.map UserJoined
                             (JD.object3 User
-                                ("name" := JD.string)
+                                ("userName" := JD.string)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
@@ -22,13 +22,34 @@ payloadDecoder =
                     "userLeft" ->
                         JD.map UserLeft
                             (JD.object3 User
-                                ("name" := JD.string)
+                                ("userName" := JD.string)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
 
                     "startEstimation" ->
                         JD.map StartEstimation (JD.object1 Task ("taskName" := JD.string))
+
+                    "userHasEstimated" ->
+                        JD.map UserHasEstimated
+                            (JD.object3 User
+                                ("userName" := JD.string)
+                                (JD.succeed True)
+                                (JD.succeed Nothing)
+                            )
+
+                    "estimationResult" ->
+                        JD.map EstimationResult
+                            (JD.at
+                                [ "estimates" ]
+                                (JD.list
+                                    (JD.object3 User
+                                        ("userName" := JD.string)
+                                        (JD.succeed True)
+                                        (JD.maybe ("estimate" := JD.string))
+                                    )
+                                )
+                            )
 
                     _ ->
                         JD.fail (eventType ++ " is not a recognized event type")

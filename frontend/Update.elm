@@ -16,6 +16,19 @@ containsUser users user =
         > 0
 
 
+replaceUser : User -> User -> User
+replaceUser updatedUser user =
+    if user.name == updatedUser.name then
+        updatedUser
+    else
+        user
+
+
+resetEstimation : User -> User
+resetEstimation user =
+    { user | hasEstimated = False, estimation = Nothing }
+
+
 sufficientInfo : Model -> Bool
 sufficientInfo model =
     not (String.isEmpty model.roomId) && not (String.isEmpty model.user.name)
@@ -94,5 +107,22 @@ update msg model =
 
                 updatedUser =
                     { user | hasEstimated = False, estimation = Nothing }
+
+                updatedUsers =
+                    List.map resetEstimation model.users
             in
-                ( { model | currentTask = Just task, user = updatedUser }, Cmd.none )
+                ( { model | currentTask = Just task, user = updatedUser, users = updatedUsers }, Cmd.none )
+
+        UserHasEstimated user ->
+            let
+                updatedUsers =
+                    List.map (replaceUser user) model.users
+            in
+                ( { model | users = updatedUsers }, Cmd.none )
+
+        EstimationResult users ->
+            let
+                filteredUsers =
+                    List.filter (\u -> u.name /= model.user.name) users
+            in
+                ( { model | users = filteredUsers }, Cmd.none )

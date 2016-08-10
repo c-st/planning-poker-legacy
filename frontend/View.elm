@@ -61,7 +61,12 @@ pokerRoomPageContent model =
 
 viewUser : User -> Html msg
 viewUser user =
-    li [] [ text user.name ]
+    let
+        estimation =
+            toString <|
+                Maybe.withDefault "--" user.estimation
+    in
+        li [] [ text (user.name ++ " " ++ toString user.hasEstimated ++ " " ++ estimation) ]
 
 
 title : String

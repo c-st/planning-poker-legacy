@@ -38,8 +38,8 @@ class PokerRoomActor(roomId: String) extends Actor {
       broadcast(RequestStartEstimation(name, taskName))
 
     case UserEstimate(name, taskName, estimation, _) =>
-      if (taskName != currentTask) {
-        println(s"[$roomId] $name cannot save estimation for '$taskName'. It is not the current task")
+      if (currentTask.isEmpty || taskName != currentTask) {
+        println(s"[$roomId] $name cannot save estimation for '$taskName'. It is not the current task.")
       } else {
         estimations = insertEstimation((name, estimation))
         println(s"[$roomId] User $name estimated $estimation for $currentTask")
@@ -56,7 +56,11 @@ class PokerRoomActor(roomId: String) extends Actor {
       } else {
         val estimates = estimations.getOrElse(currentTask, Map.empty[String, String])
         println(s"[$roomId] finishing estimation with result: $estimates")
-        broadcast(EstimationResult(currentTask, estimates))
+
+        val estimatesList = estimates.keys.toList.map(userName =>
+          UserEstimation(userName, estimates.getOrElse(userName, "")))
+        
+        broadcast(EstimationResult(currentTask, estimatesList))
         currentTask = ""
       }
 

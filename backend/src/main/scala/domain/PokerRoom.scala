@@ -56,9 +56,9 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     }
 
     incomingMessage.get("eventType") match {
-      case Some("startEstimation") => fromJson[RequestStartEstimation](textContent).copy(sender = user)
+      case Some("startEstimation") => fromJson[RequestStartEstimation](textContent).copy(userName = user)
       case Some("estimate") => fromJson[UserEstimate](textContent).copy(userName = user)
-      case Some("showResult") => fromJson[RequestShowEstimationResult](textContent).copy(sender = user)
+      case Some("showResult") => fromJson[RequestShowEstimationResult](textContent).copy(userName = user)
       case _ => IncomingMessage(user, "unknown event: " + textContent)
     }
   }
