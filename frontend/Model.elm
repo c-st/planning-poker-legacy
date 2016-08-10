@@ -41,5 +41,6 @@ type Msg
     | UserJoined User
     | UserLeft User
     | StartEstimation Task
+    | UserHasEstimated User
       -- Messages that trigger outgoing messages:
     | PerformEstimation String
