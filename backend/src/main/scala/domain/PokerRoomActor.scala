@@ -38,8 +38,8 @@ class PokerRoomActor(roomId: String) extends Actor {
       broadcast(RequestStartEstimation(name, taskName))
 
     case UserEstimate(name, taskName, estimation, _) =>
-      if (taskName != currentTask) {
-        println(s"[$roomId] $name cannot save estimation for '$taskName'. It is not the current task")
+      if (currentTask.isEmpty || taskName != currentTask) {
+        println(s"[$roomId] $name cannot save estimation for '$taskName'. It is not the current task.")
       } else {
         estimations = insertEstimation((name, estimation))
         println(s"[$roomId] User $name estimated $estimation for $currentTask")
