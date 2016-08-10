@@ -60,7 +60,17 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" False "" [] (User "" False Nothing) [] Nothing, Cmd.none )
+    ( Model
+        LandingPage
+        ""
+        False
+        ""
+        []
+        (User "" False Nothing)
+        []
+        Nothing
+    , Cmd.none
+    )
 
 
 
@@ -163,7 +173,14 @@ update msg model =
                 ( { model | users = newUsers }, Cmd.none )
 
         StartEstimation task ->
-            ( { model | currentTask = Just task }, Cmd.none )
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user | hasEstimated = False, estimation = Nothing }
+            in
+                ( { model | currentTask = Just task, user = updatedUser }, Cmd.none )
 
 
 
@@ -314,18 +331,22 @@ landingPageContent model =
 pokerRoomPageContent : Model -> Html Msg
 pokerRoomPageContent model =
     let
-        userName =
-            model.user.name
+        user =
+            model.user
+
+        currentEstimation =
+            Maybe.withDefault "" user.estimation
 
         task =
             Maybe.withDefault (Task "") model.currentTask
     in
         div []
-            [ h3 [] [ text ("userName: " ++ userName) ]
+            [ h3 [] [ text ("userName: " ++ user.name) ]
             , button [ onClick LeaveRoom ] [ text "Leave room" ]
             , h3 [] [ text ("currentTask: " ++ task.name) ]
             , div []
-                [ button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
+                [ h3 [] [ text ("currentEstimation:" ++ currentEstimation) ]
+                , button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
                 , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
                 , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
                 ]
