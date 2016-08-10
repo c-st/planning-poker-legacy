@@ -68,9 +68,7 @@ init =
 
 
 type Msg
-    = Input String
-    | Send
-    | SetUserName String
+    = SetUserName String
     | SetRoomId String
     | JoinRoom
     | LeaveRoom
@@ -82,11 +80,6 @@ type Msg
     | StartEstimation Task
       -- Messages that trigger outgoing messages:
     | PerformEstimation String
-
-
-emptyUser : User
-emptyUser =
-    User "" False (Just "")
 
 
 containsUser : List User -> User -> Bool
@@ -106,16 +99,6 @@ sufficientInfo model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Input newInput ->
-            ( { model | input = newInput }, Cmd.none )
-
-        Send ->
-            ( model
-            , WebSocket.send
-                (planningPokerServer model.user model.roomId)
-                (userEstimationEncoded model.user (Maybe.withDefault (Task "") model.currentTask))
-            )
-
         PerformEstimation estimate ->
             let
                 user =
@@ -346,8 +329,6 @@ pokerRoomPageContent model =
                 , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
                 , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
                 ]
-            , input [ onInput Input, value model.input ] []
-            , button [ onClick Send ] [ text "Send" ]
             , ul [] (List.map viewUser model.users)
             ]
 
