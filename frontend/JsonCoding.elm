@@ -79,3 +79,14 @@ userEstimationEncoded user task =
             ]
     in
         list |> JE.object |> JE.encode 0
+
+
+requestEstimationEncoded : User -> String
+requestEstimationEncoded user =
+    let
+        list =
+            [ ( "eventType", JE.string "showResult" )
+            , ( "userName", JE.string user.name )
+            ]
+    in
+        list |> JE.object |> JE.encode 0

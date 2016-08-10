@@ -59,7 +59,7 @@ class PokerRoomActor(roomId: String) extends Actor {
 
         val estimatesList = estimates.keys.toList.map(userName =>
           UserEstimation(userName, estimates.getOrElse(userName, "")))
-        
+
         broadcast(EstimationResult(currentTask, estimatesList))
         currentTask = ""
       }

@@ -2,7 +2,7 @@ module Update exposing (..)
 
 import Globals exposing (planningPokerServer)
 import Model exposing (User, Task, Model, Page(..), Msg(..))
-import JsonCoding exposing (decodePayload, userEstimationEncoded)
+import JsonCoding exposing (decodePayload, userEstimationEncoded, requestEstimationEncoded)
 import WebSocket
 import String exposing (isEmpty)
 
@@ -34,6 +34,11 @@ sufficientInfo model =
     not (String.isEmpty model.roomId) && not (String.isEmpty model.user.name)
 
 
+sendPayload : User -> String -> String -> Cmd Msg
+sendPayload user roomId payload =
+    WebSocket.send (planningPokerServer user roomId) payload
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -49,10 +54,13 @@ update msg model =
                     { user | hasEstimated = True, estimation = Just estimate }
             in
                 ( { model | user = updatedUser }
-                , WebSocket.send
-                    (planningPokerServer model.user model.roomId)
-                    (userEstimationEncoded updatedUser task)
+                , (sendPayload model.user model.roomId) (userEstimationEncoded updatedUser task)
                 )
+
+        RequestShowResult ->
+            ( model
+            , (sendPayload model.user model.roomId) (requestEstimationEncoded model.user)
+            )
 
         SetUserName newName ->
             ( { model | user = (User newName False Nothing) }, Cmd.none )
