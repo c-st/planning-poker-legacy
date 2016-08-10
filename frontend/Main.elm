@@ -20,10 +20,6 @@ main =
         }
 
 
-
--- model
-
-
 init : ( Model, Cmd Msg )
 init =
     ( Model
@@ -37,11 +33,3 @@ init =
         Nothing
     , Cmd.none
     )
-
-
-
--- update
--- decoding
--- subscriptions
--- routing
--- view
