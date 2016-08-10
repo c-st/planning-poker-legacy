@@ -10,6 +10,7 @@ import Navigation exposing (Location)
 import Platform.Sub exposing (none)
 import WebSocket
 import Json.Decode as JD exposing ((:=))
+import Json.Encode as JE exposing (encode)
 
 
 main : Program Never
@@ -35,6 +36,13 @@ type Page
 
 type alias User =
     { name : String
+    , hasEstimated : Bool
+    , estimation : Maybe String
+    }
+
+
+type alias Task =
+    { name : String
     }
 
 
@@ -44,13 +52,25 @@ type alias Model =
     , roomJoined : Bool
     , input : String
     , messages : List String
+    , user : User
     , users : List User
+    , currentTask : Maybe Task
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model LandingPage "" False "" [] [], Cmd.none )
+    ( Model
+        LandingPage
+        ""
+        False
+        ""
+        []
+        (User "" False Nothing)
+        []
+        Nothing
+    , Cmd.none
+    )
 
 
 
@@ -58,8 +78,7 @@ init =
 
 
 type Msg
-    = Input String
-    | Send
+    = SetUserName String
     | SetRoomId String
     | JoinRoom
     | LeaveRoom
@@ -68,6 +87,9 @@ type Msg
     | UnexpectedPayload String
     | UserJoined User
     | UserLeft User
+    | StartEstimation Task
+      -- Messages that trigger outgoing messages:
+    | PerformEstimation String
 
 
 containsUser : List User -> User -> Bool
@@ -79,18 +101,33 @@ containsUser users user =
         > 0
 
 
+sufficientInfo : Model -> Bool
+sufficientInfo model =
+    not (String.isEmpty model.roomId) && not (String.isEmpty model.user.name)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Input newInput ->
-            ( { model
-                | input = newInput
-              }
-            , Cmd.none
-            )
+        PerformEstimation estimate ->
+            let
+                user =
+                    model.user
 
-        Send ->
-            ( model, WebSocket.send (planningPokerServer "Chris" model.roomId) model.input )
+                task =
+                    Maybe.withDefault (Task "") model.currentTask
+
+                updatedUser =
+                    { user | hasEstimated = True, estimation = Just estimate }
+            in
+                ( { model | user = updatedUser }
+                , WebSocket.send
+                    (planningPokerServer model.user model.roomId)
+                    (userEstimationEncoded updatedUser task)
+                )
+
+        SetUserName newName ->
+            ( { model | user = (User newName False Nothing) }, Cmd.none )
 
         SetRoomId newRoomId ->
             ( { model | roomId = newRoomId }, Cmd.none )
@@ -98,15 +135,15 @@ update msg model =
         JoinRoom ->
             let
                 newPage =
-                    if String.isEmpty model.roomId then
+                    if not (sufficientInfo model) then
                         LandingPage
                     else
                         PlanningPokerRoom
             in
-                ( { model | roomJoined = True, activePage = newPage }, Cmd.none )
+                ( { model | roomJoined = sufficientInfo model, activePage = newPage, users = [] }, Cmd.none )
 
         LeaveRoom ->
-            ( { model | roomJoined = False, roomId = "", activePage = LandingPage }, Cmd.none )
+            ( { model | roomJoined = False, roomId = "", currentTask = Nothing, activePage = LandingPage }, Cmd.none )
 
         IncomingEvent payload ->
             let
@@ -135,6 +172,16 @@ update msg model =
             in
                 ( { model | users = newUsers }, Cmd.none )
 
+        StartEstimation task ->
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user | hasEstimated = False, estimation = Nothing }
+            in
+                ( { model | currentTask = Just task, user = updatedUser }, Cmd.none )
+
 
 
 -- decoding
@@ -147,10 +194,23 @@ payloadDecoder =
             \eventType ->
                 case eventType of
                     "userJoined" ->
-                        JD.map UserJoined (JD.object1 User ("name" := JD.string))
+                        JD.map UserJoined
+                            (JD.object3 User
+                                ("name" := JD.string)
+                                (JD.succeed False)
+                                (JD.succeed Nothing)
+                            )
 
                     "userLeft" ->
-                        JD.map UserLeft (JD.object1 User ("name" := JD.string))
+                        JD.map UserLeft
+                            (JD.object3 User
+                                ("name" := JD.string)
+                                (JD.succeed False)
+                                (JD.succeed Nothing)
+                            )
+
+                    "startEstimation" ->
+                        JD.map StartEstimation (JD.object1 Task ("taskName" := JD.string))
 
                     _ ->
                         JD.fail (eventType ++ " is not a recognized event type")
@@ -166,6 +226,22 @@ decodePayload payload =
             msg
 
 
+userEstimationEncoded : User -> Task -> String
+userEstimationEncoded user task =
+    let
+        estimation =
+            Maybe.withDefault "" user.estimation
+
+        list =
+            [ ( "eventType", JE.string "estimate" )
+            , ( "userName", JE.string user.name )
+            , ( "taskName", JE.string task.name )
+            , ( "estimate", JE.string estimation )
+            ]
+    in
+        list |> JE.object |> JE.encode 0
+
+
 
 -- subscriptions
 
@@ -176,7 +252,7 @@ subscriptions model =
         True ->
             let
                 serverUrl =
-                    planningPokerServer "Chris" model.roomId
+                    planningPokerServer model.user model.roomId
             in
                 WebSocket.listen serverUrl IncomingEvent
 
@@ -184,9 +260,9 @@ subscriptions model =
             Platform.Sub.none
 
 
-planningPokerServer : String -> String -> String
+planningPokerServer : User -> String -> String
 planningPokerServer user room =
-    "ws://localhost:8080/poker/" ++ room ++ "?name=Chris"
+    ("ws://localhost:8080/poker/" ++ room ++ "?name=" ++ user.name)
 
 
 
@@ -244,24 +320,38 @@ mainContent model =
 landingPageContent : Model -> Html Msg
 landingPageContent model =
     div []
-        [ h3 [] [ text ("roomId: " ++ model.roomId) ]
+        [ h3 [] [ text ("userName: " ++ model.user.name) ]
+        , input [ onInput SetUserName, value model.user.name ] []
+        , h3 [] [ text ("roomId: " ++ model.roomId) ]
         , input [ onInput SetRoomId, value model.roomId ] []
         , button [ onClick JoinRoom ] [ text "Join room" ]
         ]
 
 
-
--- show input for name when roomId is set but room is not joined
-
-
 pokerRoomPageContent : Model -> Html Msg
 pokerRoomPageContent model =
-    div []
-        [ button [ onClick LeaveRoom ] [ text "Leave room" ]
-        , input [ onInput Input, value model.input ] []
-        , button [ onClick Send ] [ text "Send" ]
-        , ul [] (List.map viewUser model.users)
-        ]
+    let
+        user =
+            model.user
+
+        currentEstimation =
+            Maybe.withDefault "" user.estimation
+
+        task =
+            Maybe.withDefault (Task "") model.currentTask
+    in
+        div []
+            [ h3 [] [ text ("userName: " ++ user.name) ]
+            , button [ onClick LeaveRoom ] [ text "Leave room" ]
+            , h3 [] [ text ("currentTask: " ++ task.name) ]
+            , div []
+                [ h3 [] [ text ("currentEstimation:" ++ currentEstimation) ]
+                , button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
+                , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
+                , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
+                ]
+            , ul [] (List.map viewUser model.users)
+            ]
 
 
 viewUser : User -> Html msg
