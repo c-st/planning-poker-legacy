@@ -21,7 +21,7 @@ RUN npm run build
 # run server
 
 WORKDIR /usr/src/app
-RUN mkdir src/main/resources/dist
+RUN mkdir /usr/src/app/src/main/resources/dist
 RUN cp -R /usr/src/app/frontend/dist /usr/src/app/src/main/resources/dist
 ADD ./backend /usr/src/app
 RUN sbt compile
