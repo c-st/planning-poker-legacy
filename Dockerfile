@@ -21,6 +21,10 @@ RUN npm run build
 # run server
 
 WORKDIR /usr/src/app
+COPY frontend/dist dist
 ADD ./backend /usr/src/app
-CMD sbt run
+
+ENTRYPOINT ["sbt"]
+CMD ["--version"]
+
 # serve: /usr/src/app/frontend/dist/*
