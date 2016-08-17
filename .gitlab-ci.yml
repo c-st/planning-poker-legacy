@@ -25,6 +25,6 @@ run_on_docker:
   script:
     - docker stop planningpoker || true
     - docker rm planningpoker || true
-    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc'  registry.stangier.io/planningpoker/planningpoker:latest run
+    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' registry.stangier.io/planningpoker/planningpoker:latest run
   only:
     - master
