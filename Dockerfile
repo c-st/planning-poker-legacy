@@ -17,8 +17,11 @@ RUN npm --quiet install
 
 COPY ./frontend /usr/src/app/frontend
 RUN npm run build
+
+RUN mkdir -p /usr/src/app/src/main/resources/dist
+
 RUN find "$PWD"
-COPY /usr/src/app/frontend/dist /usr/src/app/src/main/resources/dist
+COPY dist/ /usr/src/app/src/main/resources/dist/
 
 # /usr/src/app/frontend/dist/app.js
 # /usr/src/app/frontend/dist/index.html
