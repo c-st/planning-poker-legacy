@@ -18,11 +18,12 @@ RUN npm --quiet install
 COPY ./frontend /usr/src/app/frontend
 RUN npm run build
 
+COPY ./dist/ /usr/src/app/src/main/resources/dist/
 # run server
 
 WORKDIR /usr/src/app
 COPY ./backend /usr/src/app
-COPY ./frontend/dist/ src/main/resources/dist/
+#COPY /frontend/dist/ src/main/resources/dist/
 RUN sbt compile
 
 ENTRYPOINT ["sbt"]
