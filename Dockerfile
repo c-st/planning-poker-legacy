@@ -22,6 +22,7 @@ RUN npm run build
 
 WORKDIR /usr/src/app
 ADD ./backend /usr/src/app
+RUN sbt compile
 
 ENTRYPOINT ["sbt"]
 CMD ["--version"]
