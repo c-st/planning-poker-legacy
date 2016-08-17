@@ -18,8 +18,9 @@ RUN npm --quiet install
 COPY ./frontend /usr/src/app/frontend
 RUN npm run build
 
-COPY ./dist/ /usr/src/app/src/main/resources/dist/
-# run server
+COPY /usr/src/app/frontend/dist/ /usr/src/app/src/main/resources/dist/
+
+# build & run server
 
 WORKDIR /usr/src/app
 COPY ./backend /usr/src/app
