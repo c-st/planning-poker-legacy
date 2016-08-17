@@ -1,0 +1,30 @@
+---
+stages:
+  - build
+  - publish
+  - deploy
+
+before_script:
+  - docker info
+
+build_image:
+  stage: build
+  script:
+    - docker build -t planningpoker ./
+    - docker tag -f planningpoker registry.stangier.io/planningpoker/planningpoker:latest
+
+publish_to_registry:
+  stage: publish
+  script:
+    - docker push registry.stangier.io/planningpoker/planningpoker:latest
+  only:
+    - master
+
+run_on_docker:
+  stage: deploy
+  script:
+    - docker stop planningpoker || true
+    - docker rm planningpoker || true
+    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc'  registry.stangier.io/planningpoker/planningpoker:latest
+  only:
+    - master
