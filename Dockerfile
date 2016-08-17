@@ -11,13 +11,13 @@ RUN \
 # build frontend
 
 WORKDIR /usr/src/app/frontend
+
 ADD frontend/package.json /usr/src/app/frontend
-ADD frontend/elm-package.json /usr/src/app/frontend
 RUN npm --quiet install
 
 ADD ./frontend /usr/src/app/frontend
 RUN npm run build
-COPY /usr/src/app/frontend/dist dist/
+COPY /usr/src/app/frontend/dist/* dist/
 
 # run server
 
