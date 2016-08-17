@@ -13,6 +13,7 @@ RUN \
 WORKDIR /usr/src/app/frontend
 
 ADD frontend/package.json /usr/src/app/frontend
+RUN npm install -g elm
 RUN npm --quiet install
 
 ADD ./frontend /usr/src/app/frontend
