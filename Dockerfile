@@ -12,18 +12,17 @@ RUN \
 
 WORKDIR /usr/src/app/frontend
 
-ADD frontend/package.json /usr/src/app/frontend
+COPY frontend/package.json /usr/src/app/frontend
 RUN npm --quiet install
 
-ADD ./frontend /usr/src/app/frontend
+COPY ./frontend /usr/src/app/frontend
 RUN npm run build
 
 # run server
 
 WORKDIR /usr/src/app
-RUN mkdir /usr/src/app/src/main/resources/dist
-RUN cp -R /usr/src/app/frontend/dist /usr/src/app/src/main/resources/dist
-ADD ./backend /usr/src/app
+COPY ./backend /usr/src/app
+COPY frontend/dist src/main/resources/dist/
 RUN sbt compile
 
 ENTRYPOINT ["sbt"]
