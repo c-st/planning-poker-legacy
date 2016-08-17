@@ -22,7 +22,7 @@ RUN npm run build
 
 WORKDIR /usr/src/app
 COPY ./backend /usr/src/app
-COPY frontend/dist src/main/resources/dist/
+COPY frontend/dist/ src/main/resources/dist/
 RUN sbt compile
 
 ENTRYPOINT ["sbt"]
