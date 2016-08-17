@@ -18,8 +18,6 @@ RUN npm --quiet install
 COPY ./frontend /usr/src/app/frontend
 RUN npm run build
 
-RUN find "$PWD"
-
 RUN mkdir -p /usr/src/app/src/main/resources/dist
 RUN cp -R /usr/src/app/frontend/dist/* /usr/src/app/src/main/resources/dist/
 
@@ -27,7 +25,6 @@ RUN cp -R /usr/src/app/frontend/dist/* /usr/src/app/src/main/resources/dist/
 
 WORKDIR /usr/src/app
 COPY ./backend /usr/src/app
-#COPY /frontend/dist/ src/main/resources/dist/
 RUN sbt compile
 
 ENTRYPOINT ["sbt"]
