@@ -17,11 +17,12 @@ RUN npm --quiet install
 
 ADD ./frontend /usr/src/app/frontend
 RUN npm run build
-COPY /usr/src/app/frontend/dist/* /usr/src/app/dist/
 
 # run server
 
 WORKDIR /usr/src/app
+COPY /usr/src/app/frontend/dist dist/
+
 ADD ./backend /usr/src/app
 ENTRYPOINT ["sbt" "run"]
 # serve: /usr/src/app/dist/*
