@@ -21,13 +21,7 @@ RUN npm run build
 RUN find "$PWD"
 
 RUN mkdir -p /usr/src/app/src/main/resources/dist
-
-COPY /usr/src/app/frontend/dist/app.js /usr/src/app/src/main/resources/dist/
-COPY /usr/src/app/frontend/dist/index.html /usr/src/app/src/main/resources/dist/
-
-# /usr/src/app/frontend/dist/app.js
-# /usr/src/app/frontend/dist/index.html
-# COPY ./dist/
+RUN cp -R /usr/src/app/frontend/dist/* /usr/src/app/src/main/resources/dist/
 
 # build & run server
 
