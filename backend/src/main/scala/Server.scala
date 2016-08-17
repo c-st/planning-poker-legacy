@@ -15,9 +15,12 @@ object Server extends App {
   val port = config.getInt("app.port")
 
   val route = get {
-    pathEndOrSingleSlash {
-      complete("Welcome to websocket server")
-    } ~ PlanningPokerService.route
+    pathSingleSlash {
+      getFromResource("dist/index.html")
+    } ~
+      PlanningPokerService.route ~
+      getFromResourceDirectory("dist") ~
+      getFromResource("dist/index.html")
   }
 
   import actorSystem.dispatcher

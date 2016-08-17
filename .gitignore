@@ -4,3 +4,4 @@ frontend/elm-stuff
 frontend/node_modules
 npm-debug.log
 frontend/dist
+backend/src/main/resources/dist

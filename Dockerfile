@@ -11,16 +11,21 @@ RUN \
 # build frontend
 
 WORKDIR /usr/src/app/frontend
-ADD frontend/package.json /usr/src/app/frontend
+
+COPY frontend/package.json /usr/src/app/frontend
 RUN npm --quiet install
 
-ADD ./frontend /usr/src/app/frontend
+COPY ./frontend /usr/src/app/frontend
 RUN npm run build
-COPY /usr/src/app/frontend/dist/* dist/
 
-# run server
+RUN mkdir -p /usr/src/app/src/main/resources/dist
+RUN cp -R /usr/src/app/frontend/dist/* /usr/src/app/src/main/resources/dist/
+
+# build & run server
 
 WORKDIR /usr/src/app
-ADD ./backend /usr/src/app
-ENTRYPOINT ["sbt" "run"]
-# serve: /usr/src/app/dist/*
+COPY ./backend /usr/src/app
+RUN sbt compile
+
+ENTRYPOINT ["sbt"]
+CMD ["run"]
