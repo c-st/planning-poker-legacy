@@ -22,5 +22,5 @@ RUN npm run build
 
 WORKDIR /usr/src/app
 ADD ./backend /usr/src/app
-ENTRYPOINT ["sbt" "run"]
+CMD sbt run
 # serve: /usr/src/app/frontend/dist/*
