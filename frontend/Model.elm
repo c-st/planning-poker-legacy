@@ -43,6 +43,6 @@ type Msg
     | StartEstimation Task
     | UserHasEstimated User
     | EstimationResult (List User)
-    | RequestShowResult
       -- Messages that trigger outgoing messages:
     | PerformEstimation String
+    | RequestShowResult
