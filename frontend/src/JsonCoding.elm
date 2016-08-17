@@ -65,6 +65,18 @@ decodePayload payload =
             msg
 
 
+requestStartEstimationEncoded : User -> Task -> String
+requestStartEstimationEncoded user task =
+    let
+        list =
+            [ ( "eventType", JE.string "startEstimation" )
+            , ( "userName", JE.string user.name )
+            , ( "taskName", JE.string task.name )
+            ]
+    in
+        list |> JE.object |> JE.encode 0
+
+
 userEstimationEncoded : User -> Task -> String
 userEstimationEncoded user task =
     let
@@ -81,8 +93,8 @@ userEstimationEncoded user task =
         list |> JE.object |> JE.encode 0
 
 
-requestEstimationEncoded : User -> String
-requestEstimationEncoded user =
+requestShowResultEncoded : User -> String
+requestShowResultEncoded user =
     let
         list =
             [ ( "eventType", JE.string "showResult" )

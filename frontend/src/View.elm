@@ -55,9 +55,13 @@ pokerRoomPageContent model =
                 , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
                 , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
                 ]
-            , ul [] (List.map viewUser model.users)
+            , div []
+                [ h3 [] [ text "Users" ]
+                , ul [] (List.map viewUser model.users)
+                ]
             , div []
                 [ h3 [] [ text "Moderation" ]
+                , button [ onClick (RequestStartEstimation (Task "New task")) ] [ text "Start estimation" ]
                 , button [ onClick RequestShowResult ] [ text "Show result" ]
                 ]
             ]

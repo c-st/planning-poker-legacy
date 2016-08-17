@@ -2,7 +2,13 @@ module Update exposing (..)
 
 import Globals exposing (planningPokerServer)
 import Model exposing (User, Task, Model, Page(..), Msg(..))
-import JsonCoding exposing (decodePayload, userEstimationEncoded, requestEstimationEncoded)
+import JsonCoding
+    exposing
+        ( decodePayload
+        , requestStartEstimationEncoded
+        , userEstimationEncoded
+        , requestShowResultEncoded
+        )
 import WebSocket
 import String exposing (isEmpty)
 
@@ -42,6 +48,11 @@ sendPayload user roomId payload =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        RequestStartEstimation task ->
+            ( model
+            , (sendPayload model.user model.roomId) (requestStartEstimationEncoded model.user task)
+            )
+
         PerformEstimation estimate ->
             let
                 user =
@@ -59,7 +70,7 @@ update msg model =
 
         RequestShowResult ->
             ( model
-            , (sendPayload model.user model.roomId) (requestEstimationEncoded model.user)
+            , (sendPayload model.user model.roomId) (requestShowResultEncoded model.user)
             )
 
         SetUserName newName ->
