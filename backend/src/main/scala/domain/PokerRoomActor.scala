@@ -51,8 +51,6 @@ class PokerRoomActor(roomId: String) extends Actor {
       println(s"[$roomId] User $name asked to show result")
       if (currentTask.isEmpty) {
         println(s"[$roomId] No estimation is started yet.")
-      } else if (outstandingEstimations.nonEmpty) {
-        println(s"[$roomId] There are still users that need to estimate!")
       } else {
         val estimates = estimations.getOrElse(currentTask, Map.empty[String, String])
         println(s"[$roomId] finishing estimation with result: $estimates")
