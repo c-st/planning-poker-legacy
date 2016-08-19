@@ -8,7 +8,8 @@ import Html.Events exposing (..)
 
 view : Model -> Html Msg
 view model =
-    main' [ class "flex flex-center p2" ]
+    div
+        [ class "flex flex-column full-height" ]
         [ mainContent model ]
 
 
@@ -16,10 +17,12 @@ mainContent : Model -> Html Msg
 mainContent model =
     case model.activePage of
         LandingPage ->
-            div [ class "bold p2 mx-auto rounded bg-silver" ] [ landingPageContent model ]
+            div [ class "flex flex-center" ]
+                [ div [ class "bold p2 mx-auto rounded bg-silver" ] [ landingPageContent model ]
+                ]
 
         PlanningPokerRoom ->
-            div [] [ pokerRoomPageContent2 model ]
+            pokerRoomPageContent model
 
 
 landingPageContent : Model -> Html Msg
@@ -33,21 +36,21 @@ landingPageContent model =
         ]
 
 
-pokerRoomPageContent2 : Model -> Html Msg
-pokerRoomPageContent2 model =
-    div [ class "flex mxn2" ]
-        [ div [ class "flex-auto p2 m1 rounded bg-silver" ]
+pokerRoomPageContent : Model -> Html Msg
+pokerRoomPageContent model =
+    div [ class "flex flex-auto full-height" ]
+        [ div [ class "flex-none col-3 p2 bg-blue" ]
             [ h3 [] [ text "Actions" ]
             , currentUserView model
             , actionView model
-            , currentTaskView model
             ]
-        , div [ class "flex-auto p2 m1 rounded bg-silver" ]
+        , div [ class "flex-auto p2 bg-blue" ]
             [ h3 [] [ text "Estimate" ]
+            , currentTaskView model
             , estimationView model
             ]
-        , div [ class "flex-auto p2 m1 rounded bg-silver" ]
-            [ h3 [] [ text "Users" ]
+        , div [ class "flex-none col-3 p2 bg-aqua" ]
+            [ h3 [] [ text "Other users" ]
             , usersView model
             ]
         ]
@@ -60,7 +63,7 @@ currentUserView model =
             model.user
     in
         div []
-            [ h2 [] [ text ("User: " ++ user.name) ]
+            [ h4 [] [ text ("User: " ++ user.name) ]
             , button [ onClick LeaveRoom ] [ text "Leave room" ]
             ]
 
@@ -91,7 +94,7 @@ currentTaskView model =
             Maybe.withDefault "" user.estimation
     in
         div []
-            [ h3 [] [ text ("Task: " ++ task.name ++ " (" ++ currentEstimation ++ ")") ]
+            [ h4 [] [ text ("Task: " ++ task.name ++ " (" ++ currentEstimation ++ ")") ]
             ]
 
 
