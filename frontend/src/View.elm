@@ -76,8 +76,8 @@ pokerRoomPageContent model =
     div [ class "flex flex-auto full-height" ]
         [ div [ class "flex-none col-3 p2" ]
             [ h3 [] [ text "Actions" ]
-            , currentUserView model
             , actionView model
+            , currentUserView model
             ]
         , div [ class "flex-auto p2" ]
             [ h3 [] [ text "Estimate" ]
@@ -114,13 +114,13 @@ actionView model =
             model.user
     in
         div []
-            [ h4 [] [ text "Lorem ipsum" ]
+            [ h4 [] [ text "Show current estimation" ]
             , button
                 [ class "h6 btn btn-primary"
                 , onClick RequestShowResult
                 ]
                 [ text "Show result" ]
-            , h4 [] [ text "New estimation" ]
+            , h4 [] [ text "Start new estimation" ]
             , input
                 [ type' "text"
                 , class "block col-12 mb1 input"
