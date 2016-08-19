@@ -18,7 +18,9 @@ mainContent model =
     case model.activePage of
         LandingPage ->
             div [ class "flex flex-center" ]
-                [ div [ class "bold p2 mx-auto rounded bg-silver" ] [ landingPageContent model ]
+                [ div
+                    [ class "p2 m2 mx-auto rounded bg-silver col-6" ]
+                    [ landingPageContent model ]
                 ]
 
         PlanningPokerRoom ->
@@ -27,29 +29,62 @@ mainContent model =
 
 landingPageContent : Model -> Html Msg
 landingPageContent model =
-    div []
-        [ h3 [] [ text ("userName: " ++ model.user.name) ]
-        , input [ onInput SetUserName, value model.user.name ] []
-        , h3 [] [ text ("roomId: " ++ model.roomId) ]
-        , input [ onInput SetRoomId, value model.roomId ] []
-        , button [ onClick JoinRoom ] [ text "Join room" ]
+    Html.form [ onSubmit JoinRoom ]
+        [ h2 [] [ text "Join a room" ]
+        , label
+            [ for "userName"
+            , class "label"
+            ]
+            [ text "Your name" ]
+        , input
+            [ id "userName"
+            , type' "text"
+            , class "block col-12 mb1 input"
+            , onInput SetUserName
+            , value model.user.name
+            ]
+            []
+        , label
+            [ for "roomId"
+            , class "label"
+            ]
+            [ text "Room ID" ]
+        , input
+            [ id "roomId"
+            , type' "text"
+            , class "block col-12 mb1 input"
+            , onInput SetRoomId
+            , value model.roomId
+            ]
+            []
+        , button
+            [ class "btn btn-primary"
+            , type' "submit"
+            ]
+            [ text "Join room" ]
         ]
+
+
+options =
+    { stopPropagation = True
+    , preventDefault = True
+    }
 
 
 pokerRoomPageContent : Model -> Html Msg
 pokerRoomPageContent model =
     div [ class "flex flex-auto full-height" ]
-        [ div [ class "flex-none col-3 p2 bg-blue" ]
+        [ div [ class "flex-none col-3 p2" ]
             [ h3 [] [ text "Actions" ]
             , currentUserView model
             , actionView model
             ]
-        , div [ class "flex-auto p2 bg-blue" ]
+        , div [ class "flex-auto p2" ]
             [ h3 [] [ text "Estimate" ]
             , currentTaskView model
             , estimationView model
             ]
-        , div [ class "flex-none col-3 p2 bg-aqua" ]
+        , div [ class "flex-none col-3 p2" ]
             [ h3 [] [ text "Other users" ]
             , usersView model
             ]
@@ -64,7 +99,11 @@ currentUserView model =
     in
         div []
             [ h4 [] [ text ("User: " ++ user.name) ]
-            , button [ onClick LeaveRoom ] [ text "Leave room" ]
+            , button
+                [ class "btn btn-primary"
+                , onClick LeaveRoom
+                ]
+                [ text "Leave room" ]
             ]
 
 
@@ -76,8 +115,16 @@ actionView model =
     in
         div []
             [ h3 [] [ text "" ]
-            , button [ onClick (RequestStartEstimation (Task "New task")) ] [ text "Start estimation" ]
-            , button [ onClick RequestShowResult ] [ text "Show result" ]
+            , button
+                [ class "btn btn-primary"
+                , onClick (RequestStartEstimation (Task "New task"))
+                ]
+                [ text "Start estimation" ]
+            , button
+                [ class "btn btn-primary"
+                , onClick RequestShowResult
+                ]
+                [ text "Show result" ]
             ]
 
 
@@ -94,16 +141,24 @@ currentTaskView model =
             Maybe.withDefault "" user.estimation
     in
         div []
-            [ h4 [] [ text ("Task: " ++ task.name ++ " (" ++ currentEstimation ++ ")") ]
+            [ h4
+                []
+                [ text ("Task: " ++ task.name ++ " (" ++ currentEstimation ++ ")") ]
             ]
 
 
 estimationView : Model -> Html Msg
 estimationView model =
     div []
-        [ button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
-        , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
-        , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
+        [ button
+            [ onClick (PerformEstimation "1") ]
+            [ text "Estimate 1" ]
+        , button
+            [ onClick (PerformEstimation "2") ]
+            [ text "Estimate 2" ]
+        , button
+            [ onClick (PerformEstimation "4") ]
+            [ text "Estimate 4" ]
         ]
 
 
