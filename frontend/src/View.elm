@@ -8,7 +8,7 @@ import Html.Events exposing (..)
 
 view : Model -> Html Msg
 view model =
-    div []
+    main' [ class "flex flex-center p2" ]
         [ mainContent model ]
 
 
@@ -16,7 +16,7 @@ mainContent : Model -> Html Msg
 mainContent model =
     case model.activePage of
         LandingPage ->
-            div [] [ landingPageContent model ]
+            div [ class "bold p2 mx-auto rounded bg-silver" ] [ landingPageContent model ]
 
         PlanningPokerRoom ->
             div [] [ pokerRoomPageContent model ]
