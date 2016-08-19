@@ -19,7 +19,7 @@ mainContent model =
             div [ class "bold p2 mx-auto rounded bg-silver" ] [ landingPageContent model ]
 
         PlanningPokerRoom ->
-            div [] [ pokerRoomPageContent model ]
+            div [] [ pokerRoomPageContent2 model ]
 
 
 landingPageContent : Model -> Html Msg
@@ -33,38 +33,82 @@ landingPageContent model =
         ]
 
 
-pokerRoomPageContent : Model -> Html Msg
-pokerRoomPageContent model =
+pokerRoomPageContent2 : Model -> Html Msg
+pokerRoomPageContent2 model =
+    div [ class "flex mxn2" ]
+        [ div [ class "flex-auto p2 m1 rounded bg-silver" ]
+            [ h3 [] [ text "Actions" ]
+            , currentUserView model
+            , actionView model
+            , currentTaskView model
+            ]
+        , div [ class "flex-auto p2 m1 rounded bg-silver" ]
+            [ h3 [] [ text "Estimate" ]
+            , estimationView model
+            ]
+        , div [ class "flex-auto p2 m1 rounded bg-silver" ]
+            [ h3 [] [ text "Users" ]
+            , usersView model
+            ]
+        ]
+
+
+currentUserView : Model -> Html Msg
+currentUserView model =
+    let
+        user =
+            model.user
+    in
+        div []
+            [ h2 [] [ text ("User: " ++ user.name) ]
+            , button [ onClick LeaveRoom ] [ text "Leave room" ]
+            ]
+
+
+actionView : Model -> Html Msg
+actionView model =
+    let
+        user =
+            model.user
+    in
+        div []
+            [ h3 [] [ text "" ]
+            , button [ onClick (RequestStartEstimation (Task "New task")) ] [ text "Start estimation" ]
+            , button [ onClick RequestShowResult ] [ text "Show result" ]
+            ]
+
+
+currentTaskView : Model -> Html Msg
+currentTaskView model =
     let
         user =
             model.user
 
-        currentEstimation =
-            Maybe.withDefault "" user.estimation
-
         task =
             Maybe.withDefault (Task "") model.currentTask
+
+        currentEstimation =
+            Maybe.withDefault "" user.estimation
     in
         div []
-            [ h3 [] [ text ("userName: " ++ user.name) ]
-            , button [ onClick LeaveRoom ] [ text "Leave room" ]
-            , h3 [] [ text ("currentTask: " ++ task.name) ]
-            , div []
-                [ h3 [] [ text ("currentEstimation:" ++ currentEstimation) ]
-                , button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
-                , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
-                , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
-                ]
-            , div []
-                [ h3 [] [ text "Users" ]
-                , ul [] (List.map viewUser model.users)
-                ]
-            , div []
-                [ h3 [] [ text "Moderation" ]
-                , button [ onClick (RequestStartEstimation (Task "New task")) ] [ text "Start estimation" ]
-                , button [ onClick RequestShowResult ] [ text "Show result" ]
-                ]
+            [ h3 [] [ text ("Task: " ++ task.name ++ " (" ++ currentEstimation ++ ")") ]
             ]
+
+
+estimationView : Model -> Html Msg
+estimationView model =
+    div []
+        [ button [ onClick (PerformEstimation "1") ] [ text "Estimate 1" ]
+        , button [ onClick (PerformEstimation "2") ] [ text "Estimate 2" ]
+        , button [ onClick (PerformEstimation "4") ] [ text "Estimate 4" ]
+        ]
+
+
+usersView : Model -> Html Msg
+usersView model =
+    div []
+        [ ul [] (List.map viewUser model.users)
+        ]
 
 
 viewUser : User -> Html msg
@@ -75,8 +119,3 @@ viewUser user =
                 Maybe.withDefault "--" user.estimation
     in
         li [] [ text (user.name ++ " " ++ toString user.hasEstimated ++ " " ++ estimation) ]
-
-
-title : String
-title =
-    "Planning poker"
