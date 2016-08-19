@@ -42,6 +42,7 @@ module.exports = {
     noParse: /\.elm$/,
   },
   devServer: {
+    historyApiFallback: true,
     inline: true,
     stats: { colors: true },
   }

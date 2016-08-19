@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ace-css": "^1.1.0",
+    "css-loader": "^0.23.1",
     "elm": "^0.17.1",
     "elm-webpack-loader": "^3.0.5",
     "file-loader": "^0.9.0",
