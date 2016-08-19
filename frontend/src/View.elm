@@ -58,7 +58,7 @@ landingPageContent model =
             ]
             []
         , button
-            [ class "btn btn-primary"
+            [ class "h6 btn btn-primary"
             , type' "submit"
             ]
             [ text "Join room" ]
@@ -100,7 +100,7 @@ currentUserView model =
         div []
             [ h4 [] [ text ("User: " ++ user.name) ]
             , button
-                [ class "btn btn-primary"
+                [ class "h6 btn btn-primary"
                 , onClick LeaveRoom
                 ]
                 [ text "Leave room" ]
@@ -114,17 +114,25 @@ actionView model =
             model.user
     in
         div []
-            [ h3 [] [ text "" ]
+            [ h4 [] [ text "Lorem ipsum" ]
             , button
-                [ class "btn btn-primary"
-                , onClick (RequestStartEstimation (Task "New task"))
-                ]
-                [ text "Start estimation" ]
-            , button
-                [ class "btn btn-primary"
+                [ class "h6 btn btn-primary"
                 , onClick RequestShowResult
                 ]
                 [ text "Show result" ]
+            , h4 [] [ text "New estimation" ]
+            , input
+                [ type' "text"
+                , class "block col-12 mb1 input"
+                , onInput SetNewTaskName
+                , value model.newTaskName
+                ]
+                []
+            , button
+                [ class "h6 btn btn-primary"
+                , onClick (RequestStartEstimation (Task model.newTaskName))
+                ]
+                [ text "Start estimation" ]
             ]
 
 

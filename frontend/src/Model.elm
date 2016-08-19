@@ -21,6 +21,7 @@ type alias Task =
 type alias Model =
     { activePage : Page
     , roomId : String
+    , newTaskName : String
     , roomJoined : Bool
     , input : String
     , messages : List String
@@ -33,6 +34,7 @@ type alias Model =
 type Msg
     = SetUserName String
     | SetRoomId String
+    | SetNewTaskName String
     | JoinRoom
     | LeaveRoom
     | IncomingEvent String

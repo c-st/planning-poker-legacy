@@ -25,6 +25,7 @@ init =
     ( Model
         LandingPage
         ""
+        ""
         False
         ""
         []

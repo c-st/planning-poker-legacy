@@ -48,8 +48,11 @@ sendPayload user roomId payload =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        SetNewTaskName taskName ->
+            ( { model | newTaskName = taskName }, Cmd.none )
+
         RequestStartEstimation task ->
-            ( model
+            ( { model | newTaskName = "" }
             , (sendPayload model.user model.roomId) (requestStartEstimationEncoded model.user task)
             )
 
