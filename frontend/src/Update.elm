@@ -35,11 +35,6 @@ resetEstimation user =
     { user | hasEstimated = False, estimation = Nothing }
 
 
-sufficientInfo : Model -> Bool
-sufficientInfo model =
-    not (String.isEmpty model.roomId) && not (String.isEmpty model.user.name)
-
-
 sendPayload : User -> String -> String -> Cmd Msg
 sendPayload user roomId payload =
     WebSocket.send (planningPokerServer user roomId) payload
@@ -52,9 +47,12 @@ update msg model =
             ( { model | newTaskName = taskName }, Cmd.none )
 
         RequestStartEstimation task ->
-            ( { model | newTaskName = "" }
-            , (sendPayload model.user model.roomId) (requestStartEstimationEncoded model.user task)
-            )
+            if String.isEmpty task.name then
+                ( model, Cmd.none )
+            else
+                ( { model | newTaskName = "" }
+                , (sendPayload model.user model.roomId) (requestStartEstimationEncoded model.user task)
+                )
 
         PerformEstimation estimate ->
             let
@@ -84,13 +82,16 @@ update msg model =
 
         JoinRoom ->
             let
+                missingData =
+                    String.isEmpty model.roomId || String.isEmpty model.user.name
+
                 newPage =
-                    if not (sufficientInfo model) then
+                    if missingData then
                         LandingPage
                     else
                         PlanningPokerRoom
             in
-                ( { model | roomJoined = sufficientInfo model, activePage = newPage, users = [] }, Cmd.none )
+                ( { model | roomJoined = not missingData, activePage = newPage, users = [] }, Cmd.none )
 
         LeaveRoom ->
             ( { model | roomJoined = False, roomId = "", currentTask = Nothing, activePage = LandingPage }, Cmd.none )
@@ -136,6 +137,7 @@ update msg model =
                 ( { model | currentTask = Just task, user = updatedUser, users = updatedUsers }, Cmd.none )
 
         UserHasEstimated user ->
+            -- save this in estimations (List User)
             let
                 updatedUsers =
                     List.map (replaceUser user) model.users
@@ -147,4 +149,5 @@ update msg model =
                 filteredUsers =
                     List.filter (\u -> u.name /= model.user.name) users
             in
-                ( { model | users = filteredUsers }, Cmd.none )
+                -- todo save this in estimations instead of in `users`
+                ( { model | users = filteredUsers, currentTask = Nothing }, Cmd.none )

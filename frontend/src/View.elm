@@ -32,19 +32,6 @@ landingPageContent model =
     Html.form [ onSubmit JoinRoom ]
         [ h2 [] [ text "Join a room" ]
         , label
-            [ for "userName"
-            , class "label"
-            ]
-            [ text "Your name" ]
-        , input
-            [ id "userName"
-            , type' "text"
-            , class "block col-12 mb1 input"
-            , onInput SetUserName
-            , value model.user.name
-            ]
-            []
-        , label
             [ for "roomId"
             , class "label"
             ]
@@ -55,6 +42,19 @@ landingPageContent model =
             , class "block col-12 mb1 input"
             , onInput SetRoomId
             , value model.roomId
+            ]
+            []
+        , label
+            [ for "userName"
+            , class "label"
+            ]
+            [ text "Your name" ]
+        , input
+            [ id "userName"
+            , type' "text"
+            , class "block col-12 mb1 input"
+            , onInput SetUserName
+            , value model.user.name
             ]
             []
         , button
@@ -113,27 +113,38 @@ actionView model =
         user =
             model.user
     in
-        div []
-            [ h4 [] [ text "Show current estimation" ]
-            , button
-                [ class "h6 btn btn-primary"
-                , onClick RequestShowResult
-                ]
-                [ text "Show result" ]
-            , h4 [] [ text "Start new estimation" ]
-            , input
-                [ type' "text"
-                , class "block col-12 mb1 input"
-                , onInput SetNewTaskName
-                , value model.newTaskName
-                ]
-                []
-            , button
-                [ class "h6 btn btn-primary"
-                , onClick (RequestStartEstimation (Task model.newTaskName))
-                ]
-                [ text "Start estimation" ]
-            ]
+        case model.currentTask of
+            Just task ->
+                div []
+                    [ h4 [] [ text "Show current estimation" ]
+                    , button
+                        [ class "h6 btn btn-primary"
+                        , onClick RequestShowResult
+                        ]
+                        [ text "Show result" ]
+                    ]
+
+            Nothing ->
+                div []
+                    [ h4 [] [ text "Start new estimation" ]
+                    , input
+                        [ type' "text"
+                        , class "block col-12 mb1 input"
+                        , onInput SetNewTaskName
+                        , value model.newTaskName
+                        ]
+                        []
+                    , button
+                        [ class "h6 btn btn-primary"
+                        , onClick (RequestStartEstimation (Task model.newTaskName))
+                        ]
+                        [ text "Start estimation" ]
+                    ]
+
+
+
+--
+-- div []
 
 
 currentTaskView : Model -> Html Msg
@@ -157,17 +168,25 @@ currentTaskView model =
 
 estimationView : Model -> Html Msg
 estimationView model =
-    div []
-        [ button
-            [ onClick (PerformEstimation "1") ]
-            [ text "Estimate 1" ]
-        , button
-            [ onClick (PerformEstimation "2") ]
-            [ text "Estimate 2" ]
-        , button
-            [ onClick (PerformEstimation "4") ]
-            [ text "Estimate 4" ]
-        ]
+    case model.currentTask of
+        Nothing ->
+            div [] [ text "Showing result of task / No estimation yet" ]
+
+        Just task ->
+            div []
+                [ button
+                    [ onClick (PerformEstimation "1") ]
+                    [ text "Estimate 1" ]
+                , button
+                    [ onClick (PerformEstimation "2") ]
+                    [ text "Estimate 2" ]
+                , button
+                    [ onClick (PerformEstimation "4") ]
+                    [ text "Estimate 4" ]
+                , button
+                    [ onClick (PerformEstimation "8") ]
+                    [ text "Estimate 8" ]
+                ]
 
 
 usersView : Model -> Html Msg
