@@ -5,3 +5,14 @@ html, body {
 .full-height {
     min-height: 100vh;
 }
+
+.estimation-button-container {
+  overflow-y: auto;
+}
+
+.estimation-button-container > button {
+  width: 100px;
+  height: 100px;
+  float: left;
+  margin: 15px;
+}
