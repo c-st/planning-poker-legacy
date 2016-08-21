@@ -134,10 +134,9 @@ update msg model =
                 updatedUsers =
                     List.map resetEstimation model.users
             in
-                ( { model | currentTask = Just task, user = updatedUser, users = updatedUsers }, Cmd.none )
+                ( { model | currentTask = Just task, user = updatedUser, users = updatedUsers, currentEstimations = [] }, Cmd.none )
 
         UserHasEstimated user ->
-            -- save this in estimations (List User)
             let
                 updatedUsers =
                     List.map (replaceUser user) model.users
@@ -145,9 +144,4 @@ update msg model =
                 ( { model | users = updatedUsers }, Cmd.none )
 
         EstimationResult users ->
-            let
-                filteredUsers =
-                    List.filter (\u -> u.name /= model.user.name) users
-            in
-                -- todo save this in estimations instead of in `users`
-                ( { model | users = filteredUsers, currentTask = Nothing }, Cmd.none )
+            ( { model | currentEstimations = users, currentTask = Nothing }, Cmd.none )

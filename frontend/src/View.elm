@@ -4,6 +4,7 @@ import Model exposing (User, Model, Task, Page(..), Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import List.Extra exposing (groupWhile)
 
 
 view : Model -> Html Msg
@@ -142,11 +143,6 @@ actionView model =
                     ]
 
 
-
---
--- div []
-
-
 currentTaskView : Model -> Html Msg
 currentTaskView model =
     let
@@ -166,14 +162,37 @@ currentTaskView model =
             ]
 
 
+userEstimationsView : List User -> Html Msg
+userEstimationsView estimations =
+    let
+        estimationGroups =
+            groupWhile (\est1 est2 -> est1.estimation == est2.estimation) estimations
+
+        estimationList =
+            List.map
+                (\group ->
+                    let
+                        firstUser =
+                            Maybe.withDefault (User "" False Nothing) (List.head group)
+
+                        estimate =
+                            Maybe.withDefault "0" firstUser.estimation
+                    in
+                        li [] [ text (estimate ++ " -> count " ++ toString (List.length group)) ]
+                )
+                estimationGroups
+    in
+        div [] estimationList
+
+
 estimationView : Model -> Html Msg
 estimationView model =
     case model.currentTask of
         Nothing ->
-            div [] [ text "Showing result of task / No estimation yet" ]
+            div [] [ userEstimationsView model.currentEstimations ]
 
         Just task ->
-            div []
+            div [ class "estimation-button-container" ]
                 [ button
                     [ onClick (PerformEstimation "1") ]
                     [ text "Estimate 1" ]
@@ -181,11 +200,20 @@ estimationView model =
                     [ onClick (PerformEstimation "2") ]
                     [ text "Estimate 2" ]
                 , button
-                    [ onClick (PerformEstimation "4") ]
-                    [ text "Estimate 4" ]
+                    [ onClick (PerformEstimation "3") ]
+                    [ text "Estimate 3" ]
+                , button
+                    [ onClick (PerformEstimation "5") ]
+                    [ text "Estimate 5" ]
                 , button
                     [ onClick (PerformEstimation "8") ]
                     [ text "Estimate 8" ]
+                , button
+                    [ onClick (PerformEstimation "13") ]
+                    [ text "Estimate 13" ]
+                , button
+                    [ onClick (PerformEstimation "21") ]
+                    [ text "Estimate 21" ]
                 ]
 
 
@@ -203,4 +231,4 @@ viewUser user =
             toString <|
                 Maybe.withDefault "--" user.estimation
     in
-        li [] [ text (user.name ++ " " ++ toString user.hasEstimated ++ " " ++ estimation) ]
+        li [] [ text (user.name ++ " (has estimated: " ++ toString user.hasEstimated ++ ")") ]
