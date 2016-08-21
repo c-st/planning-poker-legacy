@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Model exposing (User, Model, Task, Page(..), Msg(..))
+import Model exposing (User, Model, Task, Page(..), Msg(..), State(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -113,34 +113,43 @@ actionView model =
     let
         user =
             model.user
-    in
-        case model.currentTask of
-            Just task ->
-                div []
-                    [ h4 [] [ text "Show current estimation" ]
-                    , button
-                        [ class "h6 btn btn-primary"
-                        , onClick RequestShowResult
-                        ]
-                        [ text "Show result" ]
-                    ]
 
-            Nothing ->
-                div []
-                    [ h4 [] [ text "Start new estimation" ]
-                    , input
-                        [ type' "text"
-                        , class "block col-12 mb1 input"
-                        , onInput SetNewTaskName
-                        , value model.newTaskName
-                        ]
-                        []
-                    , button
-                        [ class "h6 btn btn-primary"
-                        , onClick (RequestStartEstimation (Task model.newTaskName))
-                        ]
-                        [ text "Start estimation" ]
+        startEstimationView =
+            div []
+                [ h4 [] [ text "Start new estimation" ]
+                , input
+                    [ type' "text"
+                    , class "block col-12 mb1 input"
+                    , onInput SetNewTaskName
+                    , value model.newTaskName
                     ]
+                    []
+                , button
+                    [ class "h6 btn btn-primary"
+                    , onClick (RequestStartEstimation (Task model.newTaskName))
+                    ]
+                    [ text "Start estimation" ]
+                ]
+
+        showResultView =
+            div []
+                [ h4 [] [ text "Show current estimation" ]
+                , button
+                    [ class "h6 btn btn-primary"
+                    , onClick RequestShowResult
+                    ]
+                    [ text "Show result" ]
+                ]
+    in
+        case model.uiState of
+            Estimate ->
+                showResultView
+
+            Initial ->
+                startEstimationView
+
+            ShowResult ->
+                startEstimationView
 
 
 currentTaskView : Model -> Html Msg
@@ -156,9 +165,8 @@ currentTaskView model =
             Maybe.withDefault "" user.estimation
     in
         div []
-            [ h4
-                []
-                [ text ("Task: " ++ task.name ++ " (" ++ currentEstimation ++ ")") ]
+            [ h4 [] [ text ("Task: " ++ task.name) ]
+            , div [] [ text ("Your estimation: " ++ currentEstimation) ]
             ]
 
 
@@ -187,11 +195,11 @@ userEstimationsView estimations =
 
 estimationView : Model -> Html Msg
 estimationView model =
-    case model.currentTask of
-        Nothing ->
-            div [] [ userEstimationsView model.currentEstimations ]
+    case model.uiState of
+        Initial ->
+            div [] [ text "Start estimating for a new task." ]
 
-        Just task ->
+        Estimate ->
             div [ class "estimation-button-container" ]
                 [ button
                     [ onClick (PerformEstimation "1") ]
@@ -215,6 +223,9 @@ estimationView model =
                     [ onClick (PerformEstimation "21") ]
                     [ text "Estimate 21" ]
                 ]
+
+        ShowResult ->
+            div [] [ userEstimationsView model.currentEstimations ]
 
 
 usersView : Model -> Html Msg
