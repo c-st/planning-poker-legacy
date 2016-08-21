@@ -193,6 +193,11 @@ userEstimationsView estimations =
         div [] estimationList
 
 
+possibleEstimations : List String
+possibleEstimations =
+    [ "0", "1", "2", "3", "5", "8", "13", "20", "40", "100" ]
+
+
 estimationView : Model -> Html Msg
 estimationView model =
     case model.uiState of
@@ -200,29 +205,17 @@ estimationView model =
             div [] [ text "Start estimating for a new task." ]
 
         Estimate ->
-            div [ class "estimation-button-container" ]
-                [ button
-                    [ onClick (PerformEstimation "1") ]
-                    [ text "Estimate 1" ]
-                , button
-                    [ onClick (PerformEstimation "2") ]
-                    [ text "Estimate 2" ]
-                , button
-                    [ onClick (PerformEstimation "3") ]
-                    [ text "Estimate 3" ]
-                , button
-                    [ onClick (PerformEstimation "5") ]
-                    [ text "Estimate 5" ]
-                , button
-                    [ onClick (PerformEstimation "8") ]
-                    [ text "Estimate 8" ]
-                , button
-                    [ onClick (PerformEstimation "13") ]
-                    [ text "Estimate 13" ]
-                , button
-                    [ onClick (PerformEstimation "21") ]
-                    [ text "Estimate 21" ]
-                ]
+            let
+                buttons =
+                    List.map
+                        (\estimate ->
+                            button
+                                [ onClick (PerformEstimation estimate) ]
+                                [ text ("Estimate " ++ estimate) ]
+                        )
+                        possibleEstimations
+            in
+                div [ class "estimation-button-container" ] buttons
 
         ShowResult ->
             div [] [ userEstimationsView model.currentEstimations ]
