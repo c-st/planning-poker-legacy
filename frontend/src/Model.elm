@@ -27,8 +27,26 @@ type alias Model =
     , messages : List String
     , user : User
     , users : List User
+    , currentEstimations : List User
     , currentTask : Maybe Task
     }
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( Model
+        LandingPage
+        ""
+        ""
+        False
+        ""
+        []
+        (User "" False Nothing)
+        []
+        []
+        Nothing
+    , Cmd.none
+    )
 
 
 type Msg
