@@ -1,7 +1,7 @@
 module Update exposing (..)
 
 import Globals exposing (planningPokerServer)
-import Model exposing (User, Task, Model, Page(..), Msg(..))
+import Model exposing (User, Task, Model, Page(..), Msg(..), State(..))
 import JsonCoding
     exposing
         ( decodePayload
@@ -51,7 +51,11 @@ update msg model =
                 ( model, Cmd.none )
             else
                 ( { model | newTaskName = "" }
-                , (sendPayload model.user model.roomId) (requestStartEstimationEncoded model.user task)
+                , (sendPayload
+                    model.user
+                    model.roomId
+                  )
+                    (requestStartEstimationEncoded model.user task)
                 )
 
         PerformEstimation estimate ->
@@ -63,22 +67,41 @@ update msg model =
                     Maybe.withDefault (Task "") model.currentTask
 
                 updatedUser =
-                    { user | hasEstimated = True, estimation = Just estimate }
+                    { user
+                        | hasEstimated = True
+                        , estimation = Just estimate
+                    }
             in
                 ( { model | user = updatedUser }
-                , (sendPayload model.user model.roomId) (userEstimationEncoded updatedUser task)
+                , (sendPayload
+                    model.user
+                    model.roomId
+                  )
+                    (userEstimationEncoded updatedUser task)
                 )
 
         RequestShowResult ->
             ( model
-            , (sendPayload model.user model.roomId) (requestShowResultEncoded model.user)
+            , (sendPayload
+                model.user
+                model.roomId
+              )
+                (requestShowResultEncoded model.user)
             )
 
         SetUserName newName ->
-            ( { model | user = (User newName False Nothing) }, Cmd.none )
+            ( { model
+                | user = (User newName False Nothing)
+              }
+            , Cmd.none
+            )
 
         SetRoomId newRoomId ->
-            ( { model | roomId = newRoomId }, Cmd.none )
+            ( { model
+                | roomId = newRoomId
+              }
+            , Cmd.none
+            )
 
         JoinRoom ->
             let
@@ -91,10 +114,25 @@ update msg model =
                     else
                         PlanningPokerRoom
             in
-                ( { model | roomJoined = not missingData, activePage = newPage, users = [] }, Cmd.none )
+                ( { model
+                    | roomJoined = not missingData
+                    , activePage = newPage
+                    , users = []
+                  }
+                , Cmd.none
+                )
 
         LeaveRoom ->
-            ( { model | roomJoined = False, roomId = "", currentTask = Nothing, activePage = LandingPage }, Cmd.none )
+            ( { model
+                | roomJoined = False
+                , users = []
+                , currentEstimations = []
+                , roomId = ""
+                , currentTask = Nothing
+                , activePage = LandingPage
+              }
+            , Cmd.none
+            )
 
         IncomingEvent payload ->
             let
@@ -114,14 +152,22 @@ update msg model =
                     else
                         user :: model.users
             in
-                ( { model | users = newUsers }, Cmd.none )
+                ( { model
+                    | users = newUsers
+                  }
+                , Cmd.none
+                )
 
         UserLeft user ->
             let
                 newUsers =
                     List.filter (\u -> u.name /= user.name) model.users
             in
-                ( { model | users = newUsers }, Cmd.none )
+                ( { model
+                    | users = newUsers
+                  }
+                , Cmd.none
+                )
 
         StartEstimation task ->
             let
@@ -134,7 +180,15 @@ update msg model =
                 updatedUsers =
                     List.map resetEstimation model.users
             in
-                ( { model | currentTask = Just task, user = updatedUser, users = updatedUsers, currentEstimations = [] }, Cmd.none )
+                ( { model
+                    | uiState = Estimate
+                    , currentTask = Just task
+                    , user = updatedUser
+                    , users = updatedUsers
+                    , currentEstimations = []
+                  }
+                , Cmd.none
+                )
 
         UserHasEstimated user ->
             let
@@ -144,4 +198,9 @@ update msg model =
                 ( { model | users = updatedUsers }, Cmd.none )
 
         EstimationResult users ->
-            ( { model | currentEstimations = users, currentTask = Nothing }, Cmd.none )
+            ( { model
+                | uiState = ShowResult
+                , currentEstimations = users
+              }
+            , Cmd.none
+            )

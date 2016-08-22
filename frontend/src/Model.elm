@@ -6,6 +6,12 @@ type Page
     | PlanningPokerRoom
 
 
+type State
+    = Initial
+    | Estimate
+    | ShowResult
+
+
 type alias User =
     { name : String
     , hasEstimated : Bool
@@ -20,6 +26,7 @@ type alias Task =
 
 type alias Model =
     { activePage : Page
+    , uiState : State
     , roomId : String
     , newTaskName : String
     , roomJoined : Bool
@@ -36,6 +43,7 @@ init : ( Model, Cmd Msg )
 init =
     ( Model
         LandingPage
+        Initial
         ""
         ""
         False

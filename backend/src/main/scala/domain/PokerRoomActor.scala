@@ -18,6 +18,8 @@ class PokerRoomActor(roomId: String) extends Actor {
       participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
       if (!currentTask.isEmpty) {
         actorRef ! RequestStartEstimation(moderator, currentTask)
+        // broadcast users that have estimated
+        currentEstimations.foreach(estimation => actorRef ! UserHasEstimated(estimation._1, currentTask))
       }
       // TODO: fill history. broadcast all previous estimations to actorRef
       participants += name -> actorRef
