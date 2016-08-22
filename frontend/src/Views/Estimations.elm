@@ -1,25 +1,12 @@
-module Views.Estimations exposing (currentTaskView, estimationView)
+module Views.Estimations exposing (estimationView)
 
 import Model exposing (User, Model, Task, Page(..), Msg(..), State(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Chart exposing (pie, title, colours, toHtml)
-import List.Extra exposing (groupWhile)
-
-
-currentTaskView : Model -> Html Msg
-currentTaskView model =
-    let
-        user =
-            model.user
-
-        task =
-            Maybe.withDefault (Task "") model.currentTask
-    in
-        div []
-            [ h4 [] [ text ("Task: " ++ task.name) ]
-            ]
+import Dict exposing (..)
+import Dict.Extra exposing (groupBy)
 
 
 possibleEstimations : List String
@@ -46,29 +33,6 @@ estimationButton estimate model =
             [ text ("Estimate " ++ estimate) ]
 
 
-userEstimationsView : List User -> Html Msg
-userEstimationsView estimations =
-    let
-        estimationGroups =
-            groupWhile (\est1 est2 -> est1.estimation == est2.estimation) estimations
-
-        estimationList =
-            List.map
-                (\group ->
-                    let
-                        firstUser =
-                            Maybe.withDefault (User "" False Nothing) (List.head group)
-
-                        estimate =
-                            Maybe.withDefault "0" firstUser.estimation
-                    in
-                        li [] [ text (estimate ++ " -> count " ++ toString (List.length group)) ]
-                )
-                estimationGroups
-    in
-        div [] estimationList
-
-
 estimationView : Model -> Html Msg
 estimationView model =
     case model.uiState of
@@ -77,6 +41,9 @@ estimationView model =
 
         Estimate ->
             let
+                task =
+                    Maybe.withDefault (Task "") model.currentTask
+
                 buttons =
                     List.map
                         (\estimate ->
@@ -84,23 +51,47 @@ estimationView model =
                         )
                         possibleEstimations
             in
-                div [ class "estimation-button-container" ] buttons
+                div []
+                    [ h4 [] [ text task.name ]
+                    , div [ class "estimation-button-container" ] buttons
+                    ]
 
         ShowResult ->
             let
                 task =
                     Maybe.withDefault (Task "Task") model.currentTask
 
+                estimationGroups =
+                    groupBy (\e -> Maybe.withDefault "" e.estimation) model.currentEstimations
+
                 values =
-                    [ 2, 2, 3 ]
+                    List.map
+                        (\key ->
+                            let
+                                entries =
+                                    Maybe.withDefault [] (Dict.get key estimationGroups)
+                            in
+                                toFloat (List.length entries)
+                        )
+                        (Dict.keys estimationGroups)
 
                 labels =
-                    [ "1", "5", "8" ]
+                    List.map
+                        (\key ->
+                            let
+                                entries =
+                                    Maybe.withDefault [] (Dict.get key estimationGroups)
+
+                                userNames =
+                                    List.map (\user -> user.name) entries
+                            in
+                                key ++ " " ++ (toString userNames)
+                        )
+                        (Dict.keys estimationGroups)
             in
                 div []
-                    [ userEstimationsView model.currentEstimations
-                    , pie values labels
+                    [ pie values labels
                         |> Chart.title task.name
-                        |> colours [ "#0074D9", "#7FDBFF", "#2ECC40", "#FFDC00", "#FF851B", "#FF4136" ]
+                        |> colours [ "#2ECC40", "#0074D9", "#7FDBFF", "#FFDC00", "#FF851B", "#FF4136" ]
                         |> toHtml
                     ]

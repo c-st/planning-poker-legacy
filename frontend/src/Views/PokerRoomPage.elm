@@ -1,7 +1,7 @@
 module Views.PokerRoomPage exposing (planningPokerPageContent)
 
 import Views.Actions exposing (actionsView)
-import Views.Estimations exposing (currentTaskView, estimationView)
+import Views.Estimations exposing (estimationView)
 import Views.Users exposing (usersView, currentUserView)
 import Model exposing (Model, Msg)
 import Html exposing (..)
@@ -17,7 +17,6 @@ planningPokerPageContent model =
             ]
         , div [ class "flex-auto p2" ]
             [ h3 [] [ text "Estimate" ]
-            , currentTaskView model
             , estimationView model
             ]
         , div [ class "flex-none col-3 p2" ]
