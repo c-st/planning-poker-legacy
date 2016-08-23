@@ -44,6 +44,9 @@ estimationView model =
                 task =
                     Maybe.withDefault (Task "") model.currentTask
 
+                elapsedSeconds =
+                    toString model.elapsedSeconds
+
                 buttons =
                     List.map
                         (\estimate ->
@@ -53,6 +56,7 @@ estimationView model =
             in
                 div []
                     [ h4 [] [ text task.name ]
+                    , text <| "Elapsed seconds: " ++ elapsedSeconds
                     , div [ class "estimation-button-container" ] buttons
                     ]
 

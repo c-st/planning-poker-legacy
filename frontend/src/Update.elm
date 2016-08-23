@@ -40,6 +40,16 @@ sendPayload user roomId payload =
     WebSocket.send (planningPokerServer user roomId) payload
 
 
+tickTimer : Int -> Model -> Model
+tickTimer s model =
+    { model | elapsedSeconds = s + 1 }
+
+
+resetTimer : Model -> Model
+resetTimer model =
+    { model | elapsedSeconds = 0 }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -57,6 +67,17 @@ update msg model =
                   )
                     (requestStartEstimationEncoded model.user task)
                 )
+
+        TimerTick _ ->
+            case model.uiState of
+                Initial ->
+                    ( model, Cmd.none )
+
+                Estimate ->
+                    ( model |> tickTimer model.elapsedSeconds, Cmd.none )
+
+                ShowResult ->
+                    ( model, Cmd.none )
 
         PerformEstimation estimate ->
             let
@@ -186,6 +207,7 @@ update msg model =
                     , user = updatedUser
                     , users = updatedUsers
                     , currentEstimations = []
+                    , elapsedSeconds = 0
                   }
                 , Cmd.none
                 )

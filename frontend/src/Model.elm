@@ -1,5 +1,7 @@
 module Model exposing (..)
 
+import Time exposing (Time)
+
 
 type Page
     = LandingPage
@@ -36,6 +38,7 @@ type alias Model =
     , users : List User
     , currentEstimations : List User
     , currentTask : Maybe Task
+    , elapsedSeconds : Int
     }
 
 
@@ -53,6 +56,7 @@ init =
         []
         []
         Nothing
+        0
     , Cmd.none
     )
 
@@ -63,6 +67,7 @@ type Msg
     | SetNewTaskName String
     | JoinRoom
     | LeaveRoom
+    | TimerTick Time
     | IncomingEvent String
       -- is being decoded and mapped to these:
     | UnexpectedPayload String
