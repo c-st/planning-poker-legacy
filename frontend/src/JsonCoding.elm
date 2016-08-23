@@ -1,14 +1,29 @@
 module JsonCoding exposing (..)
 
 import Model exposing (User, Task, Msg(..))
-import Json.Decode as JD exposing ((:=))
+import Json.Decode as JD exposing ((:=), andThen)
 import Json.Encode as JE exposing (encode)
+import Date exposing (fromString)
+import String
+
+
+stringToDate : JD.Decoder Date.Date
+stringToDate =
+    JD.string
+        `andThen`
+            \val ->
+                case Date.fromString val of
+                    Err err ->
+                        JD.fail err
+
+                    Ok date ->
+                        JD.succeed date
 
 
 payloadDecoder : JD.Decoder Msg
 payloadDecoder =
     ("eventType" := JD.string)
-        `JD.andThen`
+        `andThen`
             \eventType ->
                 case eventType of
                     "userJoined" ->
@@ -28,7 +43,11 @@ payloadDecoder =
                             )
 
                     "startEstimation" ->
-                        JD.map StartEstimation (JD.object1 Task ("taskName" := JD.string))
+                        JD.map StartEstimation
+                            (JD.object2 Task
+                                ("taskName" := JD.string)
+                                ("startDate" := stringToDate)
+                            )
 
                     "userHasEstimated" ->
                         JD.map UserHasEstimated

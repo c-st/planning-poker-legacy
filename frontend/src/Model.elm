@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Time exposing (Time)
+import Date exposing (Date, fromTime)
 
 
 type Page
@@ -23,6 +24,7 @@ type alias User =
 
 type alias Task =
     { name : String
+    , startDate : Date
     }
 
 
@@ -71,6 +73,7 @@ type Msg
     | IncomingEvent String
       -- is being decoded and mapped to these:
     | UnexpectedPayload String
+      -- todo: handle errors
     | UserJoined User
     | UserLeft User
     | StartEstimation Task
@@ -80,3 +83,8 @@ type Msg
     | RequestStartEstimation Task
     | PerformEstimation String
     | RequestShowResult
+
+
+emptyTask : Task
+emptyTask =
+    Task "" (Date.fromTime 0)

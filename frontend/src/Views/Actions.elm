@@ -4,6 +4,7 @@ import Model exposing (User, Model, Task, Page(..), Msg(..), State(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Date exposing (fromTime)
 
 
 actionsView : Model -> Html Msg
@@ -24,7 +25,10 @@ actionsView model =
                     []
                 , button
                     [ class "h6 btn btn-outline"
-                    , onClick (RequestStartEstimation (Task model.newTaskName))
+                    , onClick
+                        (RequestStartEstimation
+                            (Task model.newTaskName (Date.fromTime 0))
+                        )
                     ]
                     [ i [ class "fa fa-play mr1" ] []
                     , text "Start estimation"

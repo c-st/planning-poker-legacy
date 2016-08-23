@@ -1,7 +1,7 @@
 module Update exposing (..)
 
 import Globals exposing (planningPokerServer)
-import Model exposing (User, Task, Model, Page(..), Msg(..), State(..))
+import Model exposing (User, Task, Model, Page(..), Msg(..), State(..), emptyTask)
 import JsonCoding
     exposing
         ( decodePayload
@@ -11,6 +11,7 @@ import JsonCoding
         )
 import WebSocket
 import String exposing (isEmpty)
+import Date exposing (now)
 
 
 containsUser : List User -> User -> Bool
@@ -74,6 +75,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 Estimate ->
+                    -- calculate: elapsedSeconds = Date.now - model.currentTask.startDate
                     ( model |> tickTimer model.elapsedSeconds, Cmd.none )
 
                 ShowResult ->
@@ -85,7 +87,9 @@ update msg model =
                     model.user
 
                 task =
-                    Maybe.withDefault (Task "") model.currentTask
+                    Maybe.withDefault
+                        emptyTask
+                        model.currentTask
 
                 updatedUser =
                     { user
