@@ -1,6 +1,8 @@
 package domain
 
 import akka.actor.{Actor, ActorRef}
+import akka.http.scaladsl.model.DateTime
+
 import scala.collection.immutable.Map
 
 class PokerRoomActor(roomId: String) extends Actor {
@@ -10,6 +12,7 @@ class PokerRoomActor(roomId: String) extends Actor {
   var moderator: String = ""
 
   var currentTask: String = ""
+  var estimationStart: DateTime = DateTime.now
   var estimations: Estimations = Map.empty[String, Map[String, String]]
 
   override def receive: Receive = {
@@ -17,7 +20,7 @@ class PokerRoomActor(roomId: String) extends Actor {
       broadcast(UserJoined(name, actorRef))
       participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
       if (!currentTask.isEmpty) {
-        actorRef ! RequestStartEstimation(moderator, currentTask)
+        actorRef ! RequestStartEstimation(moderator, currentTask, estimationStart.toIsoDateTimeString())
         // broadcast users that have estimated
         currentEstimations.foreach(estimation => actorRef ! UserHasEstimated(estimation._1, currentTask))
       }
@@ -33,11 +36,12 @@ class PokerRoomActor(roomId: String) extends Actor {
         println(s"[$roomId] Room is now empty.")
       }
 
-    case RequestStartEstimation(name, taskName, _) =>
+    case RequestStartEstimation(name, taskName, _, _) =>
       println(s"[$roomId] $name initiated an estimation for '$taskName'")
       estimations = removeTaskEstimations(taskName)
       currentTask = taskName
-      broadcast(RequestStartEstimation(name, taskName))
+      estimationStart = DateTime.now
+      broadcast(RequestStartEstimation(name, taskName, estimationStart.toIsoDateTimeString()))
 
     case UserEstimate(name, taskName, estimation, _) =>
       if (currentTask.isEmpty || taskName != currentTask) {

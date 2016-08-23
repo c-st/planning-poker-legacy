@@ -1,5 +1,7 @@
 package domain
 
+import java.util.Date
+
 import akka.actor.ActorRef
 
 case class PokerMessage(sender: String, text: String)
@@ -14,7 +16,7 @@ case class IncomingMessage(sender: String, message: String) extends PokerEvent
 case class UserJoined(userName: String, userActor: ActorRef, eventType: String = "userJoined") extends PokerEvent
 case class UserLeft(userName: String, eventType: String = "userLeft") extends PokerEvent
 
-case class RequestStartEstimation(userName: String, taskName: String, eventType: String = "startEstimation") extends PokerEvent
+case class RequestStartEstimation(userName: String, taskName: String, startDate: String, eventType: String = "startEstimation") extends PokerEvent
 case class UserEstimate(userName: String, taskName: String, estimate: String, eventType: String = "estimate") extends PokerEvent
 case class UserHasEstimated(userName: String, taskName: String, eventType: String = "userHasEstimated") extends PokerEvent
 case class RequestShowEstimationResult(userName: String, eventType: String = "showResult") extends PokerEvent
