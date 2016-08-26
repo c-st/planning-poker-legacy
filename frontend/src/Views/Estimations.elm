@@ -7,7 +7,7 @@ import Html.Events exposing (..)
 import Chart exposing (pie, title, colours, toHtml)
 import Dict exposing (..)
 import Dict.Extra exposing (groupBy)
-import Date exposing (fromTime)
+import Time exposing (inSeconds)
 
 
 possibleEstimations : List String
@@ -45,11 +45,9 @@ estimationView model =
                 task =
                     Maybe.withDefault emptyTask model.currentTask
 
-                startTime =
-                    -- show elapsedSeconds instead
-                    toString task.startDate
+                elapsedTime =
+                    toString (Time.inSeconds model.elapsedTime)
 
-                --toString model.elapsedSeconds
                 buttons =
                     List.map
                         (\estimate ->
@@ -59,7 +57,7 @@ estimationView model =
             in
                 div []
                     [ h4 [] [ text task.name ]
-                    , text <| "Start time: " ++ startTime
+                    , text <| "Elapsed: " ++ elapsedTime
                     , div [ class "estimation-button-container" ] buttons
                     ]
 

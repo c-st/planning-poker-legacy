@@ -1,7 +1,7 @@
 module Model exposing (..)
 
 import Time exposing (Time)
-import Date exposing (Date, fromTime)
+import Date exposing (Date)
 
 
 type Page
@@ -40,7 +40,7 @@ type alias Model =
     , users : List User
     , currentEstimations : List User
     , currentTask : Maybe Task
-    , elapsedSeconds : Int
+    , elapsedTime : Time
     }
 
 
