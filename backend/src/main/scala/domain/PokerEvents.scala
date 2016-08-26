@@ -1,7 +1,5 @@
 package domain
 
-import java.util.Date
-
 import akka.actor.ActorRef
 
 case class PokerMessage(sender: String, text: String)
