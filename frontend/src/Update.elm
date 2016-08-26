@@ -109,18 +109,10 @@ update msg model =
             )
 
         SetUserName newName ->
-            ( { model
-                | user = (User newName False Nothing)
-              }
-            , Cmd.none
-            )
+            ( { model | user = (User newName False Nothing) }, Cmd.none )
 
         SetRoomId newRoomId ->
-            ( { model
-                | roomId = newRoomId
-              }
-            , Cmd.none
-            )
+            ( { model | roomId = newRoomId }, Cmd.none )
 
         JoinRoom ->
             let
@@ -146,6 +138,7 @@ update msg model =
                 | roomJoined = False
                 , users = []
                 , currentEstimations = []
+                , elapsedTime = 0
                 , roomId = ""
                 , currentTask = Nothing
                 , activePage = LandingPage
@@ -171,22 +164,17 @@ update msg model =
                     else
                         user :: model.users
             in
-                ( { model
-                    | users = newUsers
-                  }
-                , Cmd.none
-                )
+                if user.name == model.user.name then
+                    ( model, Cmd.none )
+                else
+                    ( { model | users = newUsers }, Cmd.none )
 
         UserLeft user ->
             let
                 newUsers =
                     List.filter (\u -> u.name /= user.name) model.users
             in
-                ( { model
-                    | users = newUsers
-                  }
-                , Cmd.none
-                )
+                ( { model | users = newUsers }, Cmd.none )
 
         StartEstimation task ->
             let
@@ -215,7 +203,10 @@ update msg model =
                 updatedUsers =
                     List.map (replaceUser user) model.users
             in
-                ( { model | users = updatedUsers }, Cmd.none )
+                if user.name == model.user.name then
+                    ( model, Cmd.none )
+                else
+                    ( { model | users = updatedUsers }, Cmd.none )
 
         EstimationResult users ->
             ( { model
