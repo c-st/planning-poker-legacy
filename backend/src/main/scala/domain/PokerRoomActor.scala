@@ -51,6 +51,9 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       broadcast(UserLeft(name))
       participants -= name
       estimations = removeUserEstimation(currentTask, name)
+      if (outstandingEstimations(currentTask).isEmpty) {
+        context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
+      }
       log.info(s"[$roomId] User $name left room during estimation.")
 
     case UserEstimate(name, taskName, estimation, _) =>
@@ -70,10 +73,9 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       broadcast(UserJoined(name, actorRef))
       participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
       participants += name -> actorRef
-      actorRef ! RequestStartEstimation("", task, estimationStart.toIsoDateTimeString())
-      currentEstimations(task).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, task))
       log.info(s"[$roomId] User $name joined room after estimation.")
-      context.become(estimating(task, estimationStart))
+      // broadcast current estimations
+      // context.become(estimating(task, estimationStart))
 
     case UserLeft(name, _) =>
       broadcast(UserLeft(name))
