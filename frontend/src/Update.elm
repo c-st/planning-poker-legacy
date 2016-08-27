@@ -138,17 +138,29 @@ update msg model =
                 )
 
         LeaveRoom ->
-            ( { model
-                | roomJoined = False
-                , users = []
-                , currentEstimations = []
-                , elapsedTime = 0
-                , roomId = ""
-                , currentTask = Nothing
-                , activePage = LandingPage
-              }
-            , Cmd.none
-            )
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user
+                        | hasEstimated = False
+                        , estimation = Nothing
+                    }
+            in
+                ( { model
+                    | roomJoined = False
+                    , users = []
+                    , currentEstimations = []
+                    , elapsedTime = 0
+                    , roomId = ""
+                    , user = updatedUser
+                    , currentTask = Nothing
+                    , activePage = LandingPage
+                    , uiState = Initial
+                  }
+                , Cmd.none
+                )
 
         IncomingEvent payload ->
             let
