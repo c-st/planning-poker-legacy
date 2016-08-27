@@ -64,22 +64,14 @@ update msg model =
                 )
 
         TimerTick now ->
-            case model.uiState of
-                Initial ->
-                    ( model, Cmd.none )
+            let
+                task =
+                    Maybe.withDefault emptyTask model.currentTask
 
-                Estimate ->
-                    let
-                        task =
-                            Maybe.withDefault emptyTask model.currentTask
-
-                        start =
-                            Date.toTime task.startDate
-                    in
-                        ( { model | elapsedTime = now - start }, Cmd.none )
-
-                ShowResult ->
-                    ( model, Cmd.none )
+                start =
+                    Date.toTime task.startDate
+            in
+                ( { model | elapsedTime = now - start }, Cmd.none )
 
         PerformEstimation estimate ->
             let
