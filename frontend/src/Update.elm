@@ -23,12 +23,16 @@ containsUser users user =
         > 0
 
 
-replaceUser : User -> User -> User
-replaceUser updatedUser user =
-    if user.name == updatedUser.name then
-        updatedUser
-    else
-        user
+replaceUserInList : User -> List User -> List User
+replaceUserInList userToReplace userList =
+    List.map
+        (\user ->
+            if user.name == userToReplace.name then
+                userToReplace
+            else
+                user
+        )
+        userList
 
 
 resetEstimation : User -> User
@@ -160,11 +164,12 @@ update msg model =
             let
                 newUsers =
                     if containsUser model.users user then
-                        model.users
+                        replaceUserInList user model.users
                     else
                         user :: model.users
             in
                 if user.name == model.user.name then
+                    -- do not update current user
                     ( model, Cmd.none )
                 else
                     ( { model | users = newUsers }, Cmd.none )
@@ -201,10 +206,11 @@ update msg model =
         UserHasEstimated user ->
             let
                 updatedUsers =
-                    List.map (replaceUser user) model.users
+                    replaceUserInList user model.users
             in
                 if user.name == model.user.name then
                     ( model, Cmd.none )
+                    -- ( { model | user = user }, Cmd.none )
                 else
                     ( { model | users = updatedUsers }, Cmd.none )
 
