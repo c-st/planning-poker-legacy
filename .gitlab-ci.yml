@@ -1,6 +1,7 @@
 ---
 stages:
   - build
+  - test
   - publish
   - deploy
 
@@ -12,6 +13,11 @@ build_image:
   script:
     - docker build -t planningpoker ./
     - docker tag -f planningpoker registry.stangier.io/planningpoker/planningpoker:latest
+
+unit_test:
+  stage: test
+  script:
+    - docker run --rm planningpoker test
 
 publish_to_registry:
   stage: publish

@@ -17,14 +17,11 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
   def idle: Receive = {
     case UserJoined(name, actorRef, _) =>
-      broadcast(UserJoined(name, actorRef))
-      participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
-      participants += name -> actorRef
+      participants = handleUserJoined(participants, None, name, actorRef)
       log.info(s"[$roomId] User $name joined room.")
 
     case UserLeft(name, _) =>
-      broadcast(UserLeft(name))
-      participants -= name
+      participants = handleUserLeft(participants, name)
       log.info(s"[$roomId] User $name left room")
 
     case RequestStartEstimation(name, taskName, _, _) =>
@@ -40,16 +37,13 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
   def estimating(currentTask: String, estimationStart: DateTime): Receive = {
     case UserJoined(name, actorRef, _) =>
-      broadcast(UserJoined(name, actorRef))
-      participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
-      participants += name -> actorRef
-      actorRef ! RequestStartEstimation("", currentTask, estimationStart.toIsoDateTimeString())
-      currentEstimations(currentTask).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, currentTask))
+      participants = handleUserJoined(participants, Some(currentTask), name, actorRef)
       log.info(s"[$roomId] User $name joined room during an ongoing estimation.")
 
     case UserLeft(name, _) =>
-      broadcast(UserLeft(name))
-      participants -= name
+      participants = handleUserLeft(participants, name)
+
+      // remove estimations
       estimations = removeUserEstimation(currentTask, name)
       if (outstandingEstimations(currentTask).isEmpty) {
         context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
@@ -75,17 +69,12 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
   def finishedEstimating(task: String, estimationStart: DateTime, estimationEnd: DateTime): Receive = {
     case UserJoined(name, actorRef, _) =>
-      broadcast(UserJoined(name, actorRef))
-      participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
-      participants += name -> actorRef
-      currentEstimations(task).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, task))
-      actorRef ! RequestStartEstimation("", task, estimationStart.toIsoDateTimeString())
-      log.info(s"[$roomId] User $name joined room after estimation.")
+      participants = handleUserJoined(participants, Some(task), name, actorRef)
+      log.info(s"[$roomId] User $name joined room.")
       context.become(estimating(task, estimationStart))
 
     case UserLeft(name, _) =>
-      broadcast(UserLeft(name))
-      participants -= name
+      participants = handleUserLeft(participants, name)
       log.info(s"[$roomId] User $name left room after estimation.")
 
     case UserEstimate(name, taskName, estimation, _) =>
@@ -104,6 +93,29 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
         estimationEnd.toIsoDateTimeString(), estimatesList))
       log.info(s"[$roomId] finishing estimation with result: $estimates")
       context.become(idle)
+  }
+
+  private def handleUserJoined(participants: Map[String, ActorRef], task: Option[String], newUser: String, actorRef: ActorRef): Map[String, ActorRef] = {
+    broadcast(UserJoined(newUser, actorRef))
+    participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
+
+    // add user to participants
+    val updatedParticipants = participants + (newUser -> actorRef)
+
+    // broadcast current task and estimation status
+    task match {
+      case Some(justTask) => {
+        actorRef ! RequestStartEstimation("", justTask, estimationStart.toIsoDateTimeString())
+        currentEstimations(justTask).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, justTask))
+        updatedParticipants
+      }
+      case None => updatedParticipants
+    }
+  }
+
+  private def handleUserLeft(participants: Map[String, ActorRef], user: String) = {
+    broadcast(UserLeft(user))
+    participants - user
   }
 
   def broadcast(message: PokerEvent): Unit =

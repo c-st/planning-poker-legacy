@@ -48,7 +48,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
         FlowShape.of(fromWebsocket.in, backToWebsocket.out)
       }
-    }).keepAlive(FiniteDuration(30, TimeUnit.SECONDS), () => TextMessage.Strict("{\"eventType\":\"keepAlive\"}"))
+    }).keepAlive(FiniteDuration(15, TimeUnit.SECONDS), () => TextMessage(toJson(HeartBeat())))
   }
 
   def sendMessage(message: PokerMessage): Unit = pokerRoomActor ! message
