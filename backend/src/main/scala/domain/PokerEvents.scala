@@ -21,3 +21,5 @@ case class RequestShowEstimationResult(userName: String, eventType: String = "sh
 case class EstimationResult(taskName: String, startDate: String, endDate: String, estimates: List[UserEstimation], eventType: String = "estimationResult") extends PokerEvent
 
 case class UserEstimation(userName: String, estimate: String)
+
+case class HeartBeat(eventType: String = "keepAlive") extends PokerEvent
