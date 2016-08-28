@@ -1,5 +1,7 @@
 package domain
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.{FlowShape, OverflowStrategy}
@@ -8,6 +10,8 @@ import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Sink, Source}
 import scala.collection.immutable.Map
 import scala.util.parsing.json.JSON
 import com.owlike.genson.defaultGenson._
+
+import scala.concurrent.duration.FiniteDuration
 
 class PokerRoom(roomId: String, actorSystem: ActorSystem) {
   private[this] val pokerRoomActor = actorSystem.actorOf(
@@ -18,7 +22,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     val source = Source.actorRef[PokerEvent](1, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
-      implicit builder => { (responseSource) =>
+      implicit builder => { responseSource =>
 
         import GraphDSL.Implicits._
 
@@ -44,7 +48,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
         FlowShape.of(fromWebsocket.in, backToWebsocket.out)
       }
-    })
+    }).keepAlive(FiniteDuration(1, TimeUnit.MINUTES), () => TextMessage.Strict("{\"eventType\":\"keepAlive\"}"))
   }
 
   def sendMessage(message: PokerMessage): Unit = pokerRoomActor ! message
