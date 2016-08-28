@@ -165,7 +165,7 @@ class PokerRoomActorTest
       )
     }
 
-    "send estimations on requets when all users have estimated and" in {
+    "send estimations on request when all users have estimated" in {
       roomRef ! RequestShowEstimationResult("userA")
 
       val check: PartialFunction[Any, Boolean] = {
