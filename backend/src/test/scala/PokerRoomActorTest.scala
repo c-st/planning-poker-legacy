@@ -1,14 +1,14 @@
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.{TestActors, TestKit}
 import domain._
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest._
 import akka.testkit.TestProbe
 
 import scala.concurrent.duration._
 
 class PokerRoomActorTest
   extends TestKit(ActorSystem("test-system"))
-    with WordSpecLike with Matchers with BeforeAndAfterAll{
+    with WordSpecLike with Matchers with BeforeAndAfterAll {
 
   override def afterAll = {
     shutdown()
@@ -126,6 +126,7 @@ class PokerRoomActorTest
       userD.expectMsg(UserHasEstimated("userA", "new-task"))
     }
 
+    /*
     "not send estimation values when there are outstanding votes" in {
       roomRef ! RequestShowEstimationResult("userA")
 
@@ -134,6 +135,7 @@ class PokerRoomActorTest
       userC.expectNoMsg(100 millis)
       userD.expectNoMsg(100 millis)
     }
+    */
 
     "let all users estimate and broadcasts estimation status" in {
       roomRef ! UserEstimate("userB", "new-task", "20")

@@ -65,6 +65,8 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
     case RequestShowEstimationResult(name, _) =>
       log.info(s"Cannot show results. There are still outstanding votes.")
+      // remove the following once spectator mode is available:
+      context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
   }
 
   def finishedEstimating(task: String, estimationStart: DateTime, estimationEnd: DateTime): Receive = {
