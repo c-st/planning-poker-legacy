@@ -99,8 +99,12 @@ class PokerRoomActorTest
       userC.expectMsgPF(500 millis)(check)
     }
 
-    "should send current estimation to new user" in {
+    "send current estimation to new user" in {
       roomRef ! UserJoined("userD", userD.ref)
+
+      userA.expectMsg(UserJoined("userD", userD.ref))
+      userB.expectMsg(UserJoined("userD", userD.ref))
+      userC.expectMsg(UserJoined("userD", userD.ref))
 
       userD.expectMsgAllOf(
         UserJoined("userA", userA.ref),
@@ -108,9 +112,80 @@ class PokerRoomActorTest
         UserJoined("userC", userC.ref)
       )
 
-      userD.expectMsgPF(500 millis)({
+      userD.expectMsgPF(100 millis)({
         case RequestStartEstimation("", "new-task", _, _) => true
       })
+    }
+
+    "receive estimations and broadcast them" in {
+      roomRef ! UserEstimate("userA", "new-task", "5")
+
+      userA.expectMsg(UserHasEstimated("userA", "new-task"))
+      userB.expectMsg(UserHasEstimated("userA", "new-task"))
+      userC.expectMsg(UserHasEstimated("userA", "new-task"))
+      userD.expectMsg(UserHasEstimated("userA", "new-task"))
+    }
+
+    "not send estimation values when there are outstanding votes" in {
+      roomRef ! RequestShowEstimationResult("userA")
+
+      userA.expectNoMsg(100 millis)
+      userB.expectNoMsg(100 millis)
+      userC.expectNoMsg(100 millis)
+      userD.expectNoMsg(100 millis)
+    }
+
+    "let all users estimate and broadcasts estimation status" in {
+      roomRef ! UserEstimate("userB", "new-task", "20")
+      roomRef ! UserEstimate("userC", "new-task", "1")
+      roomRef ! UserEstimate("userD", "new-task", "2")
+
+      userA.expectMsgAllOf(
+        UserHasEstimated("userB", "new-task"),
+        UserHasEstimated("userC", "new-task"),
+        UserHasEstimated("userD", "new-task")
+      )
+
+      userB.expectMsgAllOf(
+        UserHasEstimated("userB", "new-task"),
+        UserHasEstimated("userC", "new-task"),
+        UserHasEstimated("userD", "new-task")
+      )
+
+      userC.expectMsgAllOf(
+        UserHasEstimated("userB", "new-task"),
+        UserHasEstimated("userC", "new-task"),
+        UserHasEstimated("userD", "new-task")
+      )
+
+      userD.expectMsgAllOf(
+        UserHasEstimated("userB", "new-task"),
+        UserHasEstimated("userC", "new-task"),
+        UserHasEstimated("userD", "new-task")
+      )
+    }
+
+    "send estimations on requets when all users have estimated and" in {
+      roomRef ! RequestShowEstimationResult("userA")
+
+      val check: PartialFunction[Any, Boolean] = {
+        case EstimationResult("new-task", _, _, estimations, _ ) => {
+          assert(estimations.length == 4)
+          estimations should contain theSameElementsAs List(
+            UserEstimation("userA", "5"),
+            UserEstimation("userB", "20"),
+            UserEstimation("userC", "1"),
+            UserEstimation("userD", "2")
+          )
+
+          true
+        }
+      }
+
+      userA.expectMsgPF(500 millis)(check)
+      userB.expectMsgPF(500 millis)(check)
+      userC.expectMsgPF(500 millis)(check)
+      userD.expectMsgPF(500 millis)(check)
     }
   }
 
