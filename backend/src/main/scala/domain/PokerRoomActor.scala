@@ -57,12 +57,17 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       log.info(s"[$roomId] User $name left room during estimation.")
 
     case UserEstimate(name, taskName, estimation, _) =>
-      estimations = insertEstimation(taskName, (name, estimation))
-      broadcast(UserHasEstimated(name, taskName))
-      log.info(s"[$roomId] User $name estimated $estimation for $currentTask")
-      if (outstandingEstimations(taskName).isEmpty) {
-        context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
+      if (taskName == currentTask) {
+        estimations = insertEstimation(taskName, (name, estimation))
+        broadcast(UserHasEstimated(name, taskName))
+        log.info(s"[$roomId] User $name estimated $estimation for $currentTask")
+        if (outstandingEstimations(taskName).isEmpty) {
+          context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
+        }
+      } else {
+        log.info(s"[$roomId] cannot save estimate for $taskName. Current task is $currentTask")
       }
+
 
     case RequestShowEstimationResult(name, _) =>
       log.info(s"Cannot show results. There are still outstanding votes.")
@@ -73,9 +78,10 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       broadcast(UserJoined(name, actorRef))
       participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
       participants += name -> actorRef
+      currentEstimations(task).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, task))
+      actorRef ! RequestStartEstimation("", task, estimationStart.toIsoDateTimeString())
       log.info(s"[$roomId] User $name joined room after estimation.")
-      // broadcast current estimations
-      // context.become(estimating(task, estimationStart))
+      context.become(estimating(task, estimationStart))
 
     case UserLeft(name, _) =>
       broadcast(UserLeft(name))
@@ -83,8 +89,12 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       log.info(s"[$roomId] User $name left room after estimation.")
 
     case UserEstimate(name, taskName, estimation, _) =>
-      estimations = insertEstimation(taskName, (name, estimation))
-      log.info(s"[$roomId] User $name estimated $estimation for $task (has changed his mind)")
+      if (taskName == task) {
+        estimations = insertEstimation(taskName, (name, estimation))
+        log.info(s"[$roomId] User $name estimated $estimation for $task (has changed his mind)")
+      } else {
+        log.info(s"[$roomId] cannot save estimate for $taskName. Current task is $task")
+      }
 
     case RequestShowEstimationResult(name, _) =>
       val estimates = estimations.getOrElse(task, Map.empty[String, String])
