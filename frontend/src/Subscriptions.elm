@@ -1,20 +1,28 @@
 module Subscriptions exposing (subscriptions)
 
 import Globals exposing (planningPokerServer)
-import Model exposing (Model, Msg, Msg(IncomingEvent))
+import Model exposing (Model, Msg, Msg(IncomingEvent, TimerTick), State(Estimate))
 import WebSocket
-import Platform.Sub exposing (none)
+import Time exposing (second)
+import Platform.Sub exposing (none, batch)
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.roomJoined of
-        True ->
-            let
-                serverUrl =
-                    planningPokerServer model.user model.roomId
-            in
-                WebSocket.listen serverUrl IncomingEvent
+    let
+        serverUrl =
+            planningPokerServer model.user model.roomId
 
-        False ->
-            Platform.Sub.none
+        webSocketSubscription =
+            if model.roomJoined then
+                WebSocket.listen serverUrl IncomingEvent
+            else
+                Platform.Sub.none
+
+        timerTickSubscription =
+            if model.uiState == Estimate then
+                Time.every second TimerTick
+            else
+                Platform.Sub.none
+    in
+        Sub.batch [ webSocketSubscription, timerTickSubscription ]

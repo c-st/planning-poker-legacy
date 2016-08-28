@@ -1,5 +1,8 @@
 module Model exposing (..)
 
+import Time exposing (Time)
+import Date exposing (Date)
+
 
 type Page
     = LandingPage
@@ -21,6 +24,7 @@ type alias User =
 
 type alias Task =
     { name : String
+    , startDate : Date
     }
 
 
@@ -36,6 +40,7 @@ type alias Model =
     , users : List User
     , currentEstimations : List User
     , currentTask : Maybe Task
+    , elapsedTime : Time
     }
 
 
@@ -53,6 +58,7 @@ init =
         []
         []
         Nothing
+        0
     , Cmd.none
     )
 
@@ -63,9 +69,11 @@ type Msg
     | SetNewTaskName String
     | JoinRoom
     | LeaveRoom
+    | TimerTick Time
     | IncomingEvent String
       -- is being decoded and mapped to these:
     | UnexpectedPayload String
+      -- todo: handle errors
     | UserJoined User
     | UserLeft User
     | StartEstimation Task
@@ -75,3 +83,8 @@ type Msg
     | RequestStartEstimation Task
     | PerformEstimation String
     | RequestShowResult
+
+
+emptyTask : Task
+emptyTask =
+    Task "" (Date.fromTime 0)

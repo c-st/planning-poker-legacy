@@ -1,5 +1,7 @@
 package domain
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.{FlowShape, OverflowStrategy}
@@ -8,6 +10,8 @@ import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Sink, Source}
 import scala.collection.immutable.Map
 import scala.util.parsing.json.JSON
 import com.owlike.genson.defaultGenson._
+
+import scala.concurrent.duration.FiniteDuration
 
 class PokerRoom(roomId: String, actorSystem: ActorSystem) {
   private[this] val pokerRoomActor = actorSystem.actorOf(
@@ -18,7 +22,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     val source = Source.actorRef[PokerEvent](1, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
-      implicit builder => { (responseSource) =>
+      implicit builder => { responseSource =>
 
         import GraphDSL.Implicits._
 
@@ -44,7 +48,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
         FlowShape.of(fromWebsocket.in, backToWebsocket.out)
       }
-    })
+    }).keepAlive(FiniteDuration(1, TimeUnit.MINUTES), () => TextMessage.Strict("{\"eventType\":\"keepAlive\"}"))
   }
 
   def sendMessage(message: PokerMessage): Unit = pokerRoomActor ! message
@@ -67,9 +71,9 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     pokerEvent match {
       case UserJoined(name, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
       case UserLeft(name, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserLeft]))
-      case RequestStartEstimation(name, taskName, _) => TextMessage(toJson(pokerEvent.asInstanceOf[RequestStartEstimation]))
+      case RequestStartEstimation(name, taskName, startDate, _) => TextMessage(toJson(pokerEvent.asInstanceOf[RequestStartEstimation]))
       case UserHasEstimated(name, taskName, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserHasEstimated]))
-      case EstimationResult(taskName, estimates, _) => TextMessage(toJson(pokerEvent.asInstanceOf[EstimationResult]))
+      case EstimationResult(taskName, startDate, endDate, estimates, _) => TextMessage(toJson(pokerEvent.asInstanceOf[EstimationResult]))
       case IncomingMessage(sender, message) => TextMessage(s"[$sender] $message")
       case _ => TextMessage(s"Unknown event")
     }

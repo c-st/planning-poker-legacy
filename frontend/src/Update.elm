@@ -1,7 +1,7 @@
 module Update exposing (..)
 
 import Globals exposing (planningPokerServer)
-import Model exposing (User, Task, Model, Page(..), Msg(..), State(..))
+import Model exposing (User, Task, Model, Page(..), Msg(..), State(..), emptyTask)
 import JsonCoding
     exposing
         ( decodePayload
@@ -11,6 +11,7 @@ import JsonCoding
         )
 import WebSocket
 import String exposing (isEmpty)
+import Date exposing (now)
 
 
 containsUser : List User -> User -> Bool
@@ -22,12 +23,16 @@ containsUser users user =
         > 0
 
 
-replaceUser : User -> User -> User
-replaceUser updatedUser user =
-    if user.name == updatedUser.name then
-        updatedUser
-    else
-        user
+replaceUserInList : User -> List User -> List User
+replaceUserInList userToReplace userList =
+    List.map
+        (\user ->
+            if user.name == userToReplace.name then
+                userToReplace
+            else
+                user
+        )
+        userList
 
 
 resetEstimation : User -> User
@@ -58,13 +63,23 @@ update msg model =
                     (requestStartEstimationEncoded model.user task)
                 )
 
+        TimerTick now ->
+            let
+                task =
+                    Maybe.withDefault emptyTask model.currentTask
+
+                start =
+                    Date.toTime task.startDate
+            in
+                ( { model | elapsedTime = now - start }, Cmd.none )
+
         PerformEstimation estimate ->
             let
                 user =
                     model.user
 
                 task =
-                    Maybe.withDefault (Task "") model.currentTask
+                    Maybe.withDefault emptyTask model.currentTask
 
                 updatedUser =
                     { user
@@ -90,18 +105,10 @@ update msg model =
             )
 
         SetUserName newName ->
-            ( { model
-                | user = (User newName False Nothing)
-              }
-            , Cmd.none
-            )
+            ( { model | user = (User newName False Nothing) }, Cmd.none )
 
         SetRoomId newRoomId ->
-            ( { model
-                | roomId = newRoomId
-              }
-            , Cmd.none
-            )
+            ( { model | roomId = newRoomId }, Cmd.none )
 
         JoinRoom ->
             let
@@ -123,16 +130,29 @@ update msg model =
                 )
 
         LeaveRoom ->
-            ( { model
-                | roomJoined = False
-                , users = []
-                , currentEstimations = []
-                , roomId = ""
-                , currentTask = Nothing
-                , activePage = LandingPage
-              }
-            , Cmd.none
-            )
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user
+                        | hasEstimated = False
+                        , estimation = Nothing
+                    }
+            in
+                ( { model
+                    | roomJoined = False
+                    , users = []
+                    , currentEstimations = []
+                    , elapsedTime = 0
+                    , roomId = ""
+                    , user = updatedUser
+                    , currentTask = Nothing
+                    , activePage = LandingPage
+                    , uiState = Initial
+                  }
+                , Cmd.none
+                )
 
         IncomingEvent payload ->
             let
@@ -148,26 +168,22 @@ update msg model =
             let
                 newUsers =
                     if containsUser model.users user then
-                        model.users
+                        replaceUserInList user model.users
                     else
                         user :: model.users
             in
-                ( { model
-                    | users = newUsers
-                  }
-                , Cmd.none
-                )
+                if user.name == model.user.name then
+                    -- do not update current user
+                    ( model, Cmd.none )
+                else
+                    ( { model | users = newUsers }, Cmd.none )
 
         UserLeft user ->
             let
                 newUsers =
                     List.filter (\u -> u.name /= user.name) model.users
             in
-                ( { model
-                    | users = newUsers
-                  }
-                , Cmd.none
-                )
+                ( { model | users = newUsers }, Cmd.none )
 
         StartEstimation task ->
             let
@@ -186,6 +202,7 @@ update msg model =
                     , user = updatedUser
                     , users = updatedUsers
                     , currentEstimations = []
+                    , elapsedTime = 0
                   }
                 , Cmd.none
                 )
@@ -193,9 +210,13 @@ update msg model =
         UserHasEstimated user ->
             let
                 updatedUsers =
-                    List.map (replaceUser user) model.users
+                    replaceUserInList user model.users
             in
-                ( { model | users = updatedUsers }, Cmd.none )
+                if user.name == model.user.name then
+                    ( model, Cmd.none )
+                    -- ( { model | user = user }, Cmd.none )
+                else
+                    ( { model | users = updatedUsers }, Cmd.none )
 
         EstimationResult users ->
             ( { model

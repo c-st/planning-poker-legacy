@@ -1,12 +1,13 @@
 module Views.Estimations exposing (estimationView)
 
-import Model exposing (User, Model, Task, Page(..), Msg(..), State(..))
+import Model exposing (User, Model, Task, Page(..), Msg(..), State(..), emptyTask)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Chart exposing (pie, title, colours, toHtml)
 import Dict exposing (..)
 import Dict.Extra exposing (groupBy)
+import Time exposing (inSeconds, inMinutes)
 
 
 possibleEstimations : List String
@@ -42,7 +43,16 @@ estimationView model =
         Estimate ->
             let
                 task =
-                    Maybe.withDefault (Task "") model.currentTask
+                    Maybe.withDefault emptyTask model.currentTask
+
+                minutes =
+                    (floor <| inMinutes model.elapsedTime) `rem` 60
+
+                seconds =
+                    (floor <| inSeconds model.elapsedTime) `rem` 60
+
+                elapsedTime =
+                    (toString minutes) ++ ":" ++ (toString seconds)
 
                 buttons =
                     List.map
@@ -53,13 +63,14 @@ estimationView model =
             in
                 div []
                     [ h4 [] [ text task.name ]
+                    , text <| "Elapsed: " ++ elapsedTime
                     , div [ class "estimation-button-container" ] buttons
                     ]
 
         ShowResult ->
             let
                 task =
-                    Maybe.withDefault (Task "Task") model.currentTask
+                    Maybe.withDefault emptyTask model.currentTask
 
                 estimationGroups =
                     groupBy (\e -> Maybe.withDefault "" e.estimation) model.currentEstimations
