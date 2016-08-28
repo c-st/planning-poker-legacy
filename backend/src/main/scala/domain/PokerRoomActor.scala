@@ -100,7 +100,8 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       val estimates = estimations.getOrElse(task, Map.empty[String, String])
       val estimatesList = estimates.keys.toList.map(userName =>
         UserEstimation(userName, estimates.getOrElse(userName, "")))
-      broadcast(EstimationResult(task, estimatesList))
+      broadcast(EstimationResult(task, estimationStart.toIsoDateTimeString(),
+        estimationEnd.toIsoDateTimeString(), estimatesList))
       log.info(s"[$roomId] finishing estimation with result: $estimates")
       context.become(idle)
   }

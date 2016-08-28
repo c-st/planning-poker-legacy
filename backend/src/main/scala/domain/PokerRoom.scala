@@ -71,9 +71,9 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     pokerEvent match {
       case UserJoined(name, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
       case UserLeft(name, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserLeft]))
-      case RequestStartEstimation(name, taskName, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[RequestStartEstimation]))
+      case RequestStartEstimation(name, taskName, startDate, _) => TextMessage(toJson(pokerEvent.asInstanceOf[RequestStartEstimation]))
       case UserHasEstimated(name, taskName, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserHasEstimated]))
-      case EstimationResult(taskName, estimates, _) => TextMessage(toJson(pokerEvent.asInstanceOf[EstimationResult]))
+      case EstimationResult(taskName, startDate, endDate, estimates, _) => TextMessage(toJson(pokerEvent.asInstanceOf[EstimationResult]))
       case IncomingMessage(sender, message) => TextMessage(s"[$sender] $message")
       case _ => TextMessage(s"Unknown event")
     }
