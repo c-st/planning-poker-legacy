@@ -58,6 +58,7 @@ payloadDecoder =
                             )
 
                     "estimationResult" ->
+                        -- startDate/endDate
                         JD.map EstimationResult
                             (JD.at
                                 [ "estimates" ]
