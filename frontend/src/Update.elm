@@ -95,11 +95,21 @@ update msg model =
                 requestShowResultEncoded model.user
             )
 
+        SetRoomId newRoomId ->
+            ( { model | roomId = newRoomId }, Cmd.none )
+
         SetUserName newName ->
             ( { model | user = (User newName False False Nothing) }, Cmd.none )
 
-        SetRoomId newRoomId ->
-            ( { model | roomId = newRoomId }, Cmd.none )
+        SetSpectator isSpectator ->
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user | isSpectator = isSpectator }
+            in
+                ( { model | user = updatedUser }, Cmd.none )
 
         JoinRoom ->
             let

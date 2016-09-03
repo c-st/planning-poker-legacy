@@ -8,7 +8,7 @@ import Html.Events exposing (..)
 
 landingPageContent : Model -> Html Msg
 landingPageContent model =
-    Html.form [ onSubmit JoinRoom ]
+    Html.form [ onSubmit <| JoinRoom ]
         [ h2 [] [ text "Join a room" ]
         , label
             [ for "roomId"
@@ -36,6 +36,19 @@ landingPageContent model =
             , value model.user.name
             ]
             []
+        , label
+            [ for "isSpectator"
+            , class "label"
+            ]
+            [ text "Join as spectator" ]
+        , input
+            [ id "isSpectator"
+            , type' "checkbox"
+            , class "block col-12 mb1 input"
+            , checked model.user.isSpectator
+            , onCheck SetSpectator
+            ]
+            []
         , button
             [ class "h6 btn btn-primary"
             , type' "submit"
@@ -44,6 +57,7 @@ landingPageContent model =
         ]
 
 
+options : { preventDefault : Bool, stopPropagation : Bool }
 options =
     { stopPropagation = True
     , preventDefault = True

@@ -66,6 +66,7 @@ init =
 
 type Msg
     = SetUserName String
+    | SetSpectator Bool
     | SetRoomId String
     | SetNewTaskName String
     | JoinRoom

@@ -29,7 +29,7 @@ payloadDecoder =
                         JD.map UserJoined
                             (JD.object4 User
                                 ("userName" := JD.string)
-                                (JD.succeed False)
+                                ("isSpectator" := JD.bool)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
