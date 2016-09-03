@@ -1,6 +1,6 @@
 module Update exposing (..)
 
-import Globals exposing (planningPokerServer)
+import Globals exposing (planningPokerServerUrl)
 import Model exposing (User, Task, Model, Page(..), Msg(..), State(..), emptyTask)
 import JsonCoding
     exposing
@@ -40,9 +40,9 @@ resetEstimation user =
     { user | hasEstimated = False, estimation = Nothing }
 
 
-sendPayload : User -> String -> String -> Cmd Msg
-sendPayload user roomId payload =
-    WebSocket.send (planningPokerServer user roomId) payload
+sendPayload : Model -> String -> Cmd Msg
+sendPayload model payload =
+    WebSocket.send (planningPokerServerUrl model) payload
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,11 +56,8 @@ update msg model =
                 ( model, Cmd.none )
             else
                 ( { model | newTaskName = "" }
-                , (sendPayload
-                    model.user
-                    model.roomId
-                  )
-                    (requestStartEstimationEncoded model.user task)
+                , sendPayload model <|
+                    requestStartEstimationEncoded model.user task
                 )
 
         TimerTick now ->
@@ -88,24 +85,18 @@ update msg model =
                     }
             in
                 ( { model | user = updatedUser }
-                , (sendPayload
-                    model.user
-                    model.roomId
-                  )
-                    (userEstimationEncoded updatedUser task)
+                , sendPayload model <|
+                    userEstimationEncoded updatedUser task
                 )
 
         RequestShowResult ->
             ( model
-            , (sendPayload
-                model.user
-                model.roomId
-              )
-                (requestShowResultEncoded model.user)
+            , sendPayload model <|
+                requestShowResultEncoded model.user
             )
 
         SetUserName newName ->
-            ( { model | user = (User newName False Nothing) }, Cmd.none )
+            ( { model | user = (User newName False False Nothing) }, Cmd.none )
 
         SetRoomId newRoomId ->
             ( { model | roomId = newRoomId }, Cmd.none )

@@ -4,7 +4,6 @@ import Model exposing (User, Task, Msg(..))
 import Json.Decode as JD exposing ((:=), andThen)
 import Json.Encode as JE exposing (encode)
 import Date exposing (fromString)
-import String
 
 
 stringToDate : JD.Decoder Date.Date
@@ -28,16 +27,18 @@ payloadDecoder =
                 case eventType of
                     "userJoined" ->
                         JD.map UserJoined
-                            (JD.object3 User
+                            (JD.object4 User
                                 ("userName" := JD.string)
+                                (JD.succeed False)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
 
                     "userLeft" ->
                         JD.map UserLeft
-                            (JD.object3 User
+                            (JD.object4 User
                                 ("userName" := JD.string)
+                                (JD.succeed False)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
@@ -51,8 +52,9 @@ payloadDecoder =
 
                     "userHasEstimated" ->
                         JD.map UserHasEstimated
-                            (JD.object3 User
+                            (JD.object4 User
                                 ("userName" := JD.string)
+                                (JD.succeed False)
                                 (JD.succeed True)
                                 (JD.succeed Nothing)
                             )
@@ -63,8 +65,9 @@ payloadDecoder =
                             (JD.at
                                 [ "estimates" ]
                                 (JD.list
-                                    (JD.object3 User
+                                    (JD.object4 User
                                         ("userName" := JD.string)
+                                        (JD.succeed False)
                                         (JD.succeed True)
                                         (JD.maybe ("estimate" := JD.string))
                                     )

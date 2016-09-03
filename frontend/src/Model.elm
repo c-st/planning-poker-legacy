@@ -17,6 +17,7 @@ type State
 
 type alias User =
     { name : String
+    , isSpectator : Bool
     , hasEstimated : Bool
     , estimation : Maybe String
     }
@@ -54,7 +55,7 @@ init =
         False
         ""
         []
-        (User "" False Nothing)
+        emptyUser
         []
         []
         Nothing
@@ -88,3 +89,8 @@ type Msg
 emptyTask : Task
 emptyTask =
     Task "" (Date.fromTime 0)
+
+
+emptyUser : User
+emptyUser =
+    (User "" False False Nothing)
