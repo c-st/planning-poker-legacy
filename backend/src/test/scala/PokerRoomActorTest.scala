@@ -126,7 +126,6 @@ class PokerRoomActorTest
       userD.expectMsg(UserHasEstimated("userA", "new-task"))
     }
 
-    /*
     "not send estimation values when there are outstanding votes" in {
       roomRef ! RequestShowEstimationResult("userA")
 
@@ -135,7 +134,6 @@ class PokerRoomActorTest
       userC.expectNoMsg(100 millis)
       userD.expectNoMsg(100 millis)
     }
-    */
 
     "let all users estimate and broadcasts estimation status" in {
       roomRef ! UserEstimate("userB", "new-task", "20")
@@ -188,6 +186,106 @@ class PokerRoomActorTest
       userB.expectMsgPF(500 millis)(check)
       userC.expectMsgPF(500 millis)(check)
       userD.expectMsgPF(500 millis)(check)
+    }
+  }
+
+  "Estimation with spectator" should {
+    val roomRef = system.actorOf(Props(classOf[PokerRoomActor], "estimation-test-room-spectators"))
+    val userA = TestProbe()
+    val userB = TestProbe()
+    val userC = TestProbe()
+    val spectator = TestProbe()
+
+    "setup" in {
+      roomRef ! UserJoined("userA", userA.ref)
+      roomRef ! UserJoined("userB", userB.ref)
+      roomRef ! UserJoined("spectator", spectator.ref, isSpectator = true)
+
+      userB.expectMsgAllOf(
+        UserJoined("userA", userA.ref, isSpectator = false),
+        UserJoined("spectator", spectator.ref, isSpectator = true)
+      )
+
+      userA.expectMsgAllOf(
+        UserJoined("userB", userB.ref, isSpectator = false),
+        UserJoined("spectator", spectator.ref, isSpectator = true)
+      )
+
+      spectator.expectMsgAllOf(
+        UserJoined("userA", userA.ref,  isSpectator = false),
+        UserJoined("userB", userB.ref,  isSpectator = false)
+      )
+    }
+
+    "spectators are sent to new users" in {
+      roomRef ! UserJoined("userC", userC.ref)
+
+      userC.expectMsgAllOf(
+        UserJoined("userA", userA.ref, isSpectator = false),
+        UserJoined("userB", userB.ref, isSpectator = false),
+        UserJoined("spectator", spectator.ref, isSpectator = true)
+      )
+
+      userA.expectMsg(UserJoined("userC", userC.ref))
+      userB.expectMsg(UserJoined("userC", userC.ref))
+      spectator.expectMsg(UserJoined("userC", userC.ref))
+
+      roomRef ! UserLeft("userC")
+      userA.expectMsg(UserLeft("userC"))
+      userB.expectMsg(UserLeft("userC"))
+      spectator.expectMsg(UserLeft("userC"))
+    }
+
+    "spectator can initiate estimation, but cannot vote" in {
+      roomRef ! RequestStartEstimation("spectator", "new-task", "20150102T13:37:00")
+
+      val check: PartialFunction[Any, Boolean] = {
+        case RequestStartEstimation("spectator", "new-task", _, _) => true
+      }
+
+      userA.expectMsgPF(500 millis)(check)
+      userB.expectMsgPF(500 millis)(check)
+      spectator.expectMsgPF(500 millis)(check)
+
+      roomRef ! UserEstimate("userA", "new-task", "20")
+      roomRef ! UserEstimate("userB", "new-task", "1")
+      roomRef ! UserEstimate("spectator", "new-task", "2")
+
+      userA.expectMsgAllOf(
+        UserHasEstimated("userA", "new-task"),
+        UserHasEstimated("userB", "new-task")
+      )
+
+      userB.expectMsgAllOf(
+        UserHasEstimated("userA", "new-task"),
+        UserHasEstimated("userB", "new-task")
+      )
+
+      spectator.expectMsgAllOf(
+        UserHasEstimated("userA", "new-task"),
+        UserHasEstimated("userB", "new-task")
+      )
+
+      expectNoMsg(500 millis)
+    }
+
+    "estimation can be shown once all participants have voted (excluding spectators)" in {
+      roomRef ! RequestShowEstimationResult("userA")
+
+      val check: PartialFunction[Any, Boolean] = {
+        case EstimationResult("new-task", _, _, estimations, _ ) => {
+          assert(estimations.length == 2)
+          estimations should contain theSameElementsAs List(
+            UserEstimation("userA", "20"),
+            UserEstimation("userB", "1")
+          )
+          true
+        }
+      }
+
+      userA.expectMsgPF(500 millis)(check)
+      userB.expectMsgPF(500 millis)(check)
+      spectator.expectMsgPF(500 millis)(check)
     }
   }
 

@@ -1,8 +1,18 @@
-module Globals exposing (..)
+module Globals exposing (planningPokerServerUrl)
 
-import Model exposing (User)
+import Model exposing (Model)
 
 
-planningPokerServer : User -> String -> String
-planningPokerServer user room =
-    ("ws://planningpoker.cc/poker/" ++ room ++ "?name=" ++ user.name)
+planningPokerServerUrl : Model -> String
+planningPokerServerUrl model =
+    let
+        roomId =
+            model.roomId
+
+        name =
+            model.user.name
+
+        isSpectator =
+            toString model.user.isSpectator
+    in
+        ("ws:/localhost:8080/poker/" ++ roomId ++ "?name=" ++ name ++ "&spectator=" ++ isSpectator)

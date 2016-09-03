@@ -60,11 +60,23 @@ estimationView model =
                             estimationButton estimate model
                         )
                         possibleEstimations
+
+                estimationView =
+                    div [ class "estimation-button-container" ] buttons
+
+                spectatorView =
+                    div [] [ text "Estimation is ongoing" ]
+
+                view =
+                    if model.user.isSpectator then
+                        spectatorView
+                    else
+                        estimationView
             in
                 div []
                     [ h4 [] [ text task.name ]
                     , text <| "Elapsed: " ++ elapsedTime
-                    , div [ class "estimation-button-container" ] buttons
+                    , view
                     ]
 
         ShowResult ->

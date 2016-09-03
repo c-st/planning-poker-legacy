@@ -44,6 +44,8 @@ viewUser user =
         cssClass =
             if user.hasEstimated then
                 "mr1 fa fa-check-circle-o green"
+            else if user.isSpectator then
+                "mr1 fa fa-eye"
             else
                 ""
     in
