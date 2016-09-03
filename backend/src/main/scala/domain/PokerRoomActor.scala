@@ -7,8 +7,10 @@ import scala.collection.immutable.Map
 
 class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   type Estimations = Map[String, Map[String, String]]
+  type UserMap = Map[String, ActorRef]
 
-  var participants: Map[String, ActorRef] = Map.empty[String, ActorRef]
+  var participants: UserMap = Map.empty[String, ActorRef]
+  var spectators: UserMap = Map.empty[String, ActorRef]
 
   var estimationStart: DateTime = DateTime.now
   var estimations: Estimations = Map.empty[String, Map[String, String]]
@@ -16,12 +18,16 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   def receive = idle
 
   def idle: Receive = {
-    case UserJoined(name, actorRef, _) =>
-      participants = handleUserJoined(participants, None, name, actorRef)
-      log.info(s"[$roomId] User $name joined room.")
+    case UserJoined(name, actorRef, isSpectator, _) =>
+      val updatedUsers = handleUserJoined(participants, spectators, None, name, isSpectator, actorRef)
+      participants = updatedUsers._1
+      spectators = updatedUsers._2
+      log.info(s"[$roomId] User $name joined room (spectator: $isSpectator).")
 
     case UserLeft(name, _) =>
-      participants = handleUserLeft(participants, name)
+      val updatedUsers = handleUserLeft(participants, spectators, name)
+      participants = updatedUsers._1
+      spectators = updatedUsers._2
       log.info(s"[$roomId] User $name left room")
 
     case RequestStartEstimation(name, taskName, _, _) =>
@@ -36,12 +42,16 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   }
 
   def estimating(currentTask: String, estimationStart: DateTime): Receive = {
-    case UserJoined(name, actorRef, _) =>
-      participants = handleUserJoined(participants, Some(currentTask), name, actorRef)
-      log.info(s"[$roomId] User $name joined room during an ongoing estimation.")
+    case UserJoined(name, actorRef, isSpectator, _) =>
+      val updatedUsers = handleUserJoined(participants, spectators, Some(currentTask), name, isSpectator, actorRef)
+      participants = updatedUsers._1
+      spectators = updatedUsers._2
+      log.info(s"[$roomId] User $name joined room during an ongoing estimation (spectator: $isSpectator).")
 
     case UserLeft(name, _) =>
-      participants = handleUserLeft(participants, name)
+      val updatedUsers = handleUserLeft(participants, spectators, name)
+      participants = updatedUsers._1
+      spectators = updatedUsers._2
 
       // remove estimations
       estimations = removeUserEstimation(currentTask, name)
@@ -51,7 +61,9 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       log.info(s"[$roomId] User $name left room during estimation.")
 
     case UserEstimate(name, taskName, estimation, _) =>
-      if (taskName == currentTask) {
+      if (!isParticipant(name)) {
+        log.info(s"[$roomId] cannot save estimate. User is spectator.")
+      } else if (taskName == currentTask) {
         estimations = insertEstimation(taskName, (name, estimation))
         broadcast(UserHasEstimated(name, taskName))
         log.info(s"[$roomId] User $name estimated $estimation for $currentTask")
@@ -65,22 +77,26 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
     case RequestShowEstimationResult(name, _) =>
       log.info(s"Cannot show results. There are still outstanding votes.")
-      // remove the following once spectator mode is available:
-      context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
   }
 
   def finishedEstimating(task: String, estimationStart: DateTime, estimationEnd: DateTime): Receive = {
-    case UserJoined(name, actorRef, _) =>
-      participants = handleUserJoined(participants, Some(task), name, actorRef)
-      log.info(s"[$roomId] User $name joined room.")
+    case UserJoined(name, actorRef, isSpectator, _) =>
+      val updatedUsers = handleUserJoined(participants, spectators, Some(task), name, isSpectator, actorRef)
+      participants = updatedUsers._1
+      spectators = updatedUsers._2
+      log.info(s"[$roomId] User $name joined room (spectator: $isSpectator).")
       context.become(estimating(task, estimationStart))
 
     case UserLeft(name, _) =>
-      participants = handleUserLeft(participants, name)
+      val updatedUsers = handleUserLeft(participants, spectators, name)
+      participants = updatedUsers._1
+      spectators = updatedUsers._2
       log.info(s"[$roomId] User $name left room after estimation.")
 
     case UserEstimate(name, taskName, estimation, _) =>
-      if (taskName == task) {
+      if (!isParticipant(name)) {
+        log.info(s"[$roomId] cannot save estimate. User is spectator.")
+      } else if (taskName == task) {
         estimations = insertEstimation(taskName, (name, estimation))
         log.info(s"[$roomId] User $name estimated $estimation for $task (has changed his mind)")
       } else {
@@ -97,34 +113,52 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       context.become(idle)
   }
 
-  private def handleUserJoined(participants: Map[String, ActorRef], task: Option[String], newUser: String, actorRef: ActorRef): Map[String, ActorRef] = {
-    broadcast(UserJoined(newUser, actorRef))
+  private def handleUserJoined(participants: UserMap,
+                               spectators: UserMap,
+                               task: Option[String],
+                               newUser: String,
+                               isSpectator: Boolean,
+                               actorRef: ActorRef): (UserMap, UserMap) = {
+    broadcast(UserJoined(newUser, actorRef, isSpectator))
     participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
+    spectators.foreach(p => actorRef ! UserJoined(p._1, p._2, isSpectator = true))
 
-    // add user to participants
-    val updatedParticipants = participants + (newUser -> actorRef)
+    // update participants or spectators
+    val users = isSpectator match {
+      case false => (participants + (newUser -> actorRef), spectators)
+      case true => (participants, spectators  + (newUser -> actorRef))
+    }
 
     // broadcast current task and estimation status
     task match {
       case Some(justTask) => {
         actorRef ! RequestStartEstimation("", justTask, estimationStart.toIsoDateTimeString())
         currentEstimations(justTask).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, justTask))
-        updatedParticipants
+        users
       }
-      case None => updatedParticipants
+      case None => users
     }
   }
 
-  private def handleUserLeft(participants: Map[String, ActorRef], user: String) = {
+  private def handleUserLeft(participants: UserMap,
+                             spectators: UserMap,
+                             user: String): (UserMap, UserMap) = {
     broadcast(UserLeft(user))
-    participants - user
+
+    // remove users from participants or spectators
+    (participants - user, spectators - user)
   }
 
-  def broadcast(message: PokerEvent): Unit =
+  def broadcast(message: PokerEvent) = {
     participants.values.foreach(_ ! message)
+    spectators.values.foreach(_ ! message)
+  }
 
   private def allActors: List[ActorRef] =
     participants.keys.toList.flatMap(participants.get)
+
+  private def isParticipant(userName: String): Boolean =
+    participants.contains(userName)
 
   private def previousEstimations(currentTask: String): Estimations =
     estimations.filter(_._1 != currentTask)
@@ -132,7 +166,7 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   private def currentEstimations(currentTask: String): Map[String, String] =
     estimations.getOrElse(currentTask, Map.empty[String, String])
 
-  private def outstandingEstimations(currentTask: String) : Map[String, ActorRef] =
+  private def outstandingEstimations(currentTask: String) : UserMap =
     participants.filter(p => !currentEstimations(currentTask).keys.toList.contains(p._1))
 
   private def insertEstimation(currentTask: String, estimation: (String, String)) : Estimations = {

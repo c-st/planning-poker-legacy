@@ -18,7 +18,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     Props(classOf[PokerRoomActor], roomId)
   )
 
-  def websocketFlow(user: String): Flow[Message, Message, _] = {
+  def websocketFlow(user: String, isSpectator: Boolean): Flow[Message, Message, _] = {
     val source = Source.actorRef[PokerEvent](1, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
@@ -29,7 +29,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
         // TextMessage -> PokerEvent
         val fromWebsocket = builder.add(
           Flow[Message].collect {
-            case TextMessage.Strict(textContent) => mapToIncomingPokerEvent(user, textContent)
+            case TextMessage.Strict(textContent) => mapToIncomingPokerEvent(user, isSpectator, textContent)
           })
 
         // PokerEvent -> TextMessage
@@ -38,7 +38,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
         val pokerRoomActorSink = Sink.actorRef[PokerEvent](pokerRoomActor, UserLeft(user))
         val merge = builder.add(Merge[PokerEvent](2))
-        val actorConnected = Flow[ActorRef].map(UserJoined(user, _))
+        val actorConnected = Flow[ActorRef].map(UserJoined(user, _, isSpectator))
 
         builder.materializedValue ~> actorConnected ~> merge.in(1)
         fromWebsocket ~> merge.in(0)
@@ -53,7 +53,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
   def sendMessage(message: PokerMessage): Unit = pokerRoomActor ! message
 
-  private def mapToIncomingPokerEvent(user: String, textContent: String): PokerEvent = {
+  private def mapToIncomingPokerEvent(user: String, isSpectator: Boolean, textContent: String): PokerEvent = {
     val incomingMessage = JSON.parseFull(textContent) match {
       case Some(map: Map[_, Any]) => map.asInstanceOf[Map[String, Any]]
       case _ => Map("eventType" -> "unknown")
@@ -69,7 +69,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
   private def mapToOutgoingTextMessage(pokerEvent: PokerEvent): TextMessage = {
     pokerEvent match {
-      case UserJoined(name, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
+      case UserJoined(name, _, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
       case UserLeft(name, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserLeft]))
       case RequestStartEstimation(name, taskName, startDate, _) => TextMessage(toJson(pokerEvent.asInstanceOf[RequestStartEstimation]))
       case UserHasEstimated(name, taskName, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserHasEstimated]))

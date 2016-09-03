@@ -11,7 +11,7 @@ object SystemMessage {
 sealed trait PokerEvent
 case class IncomingMessage(sender: String, message: String) extends PokerEvent
 
-case class UserJoined(userName: String, userActor: ActorRef, eventType: String = "userJoined") extends PokerEvent
+case class UserJoined(userName: String, userActor: ActorRef, isSpectator: Boolean = false, eventType: String = "userJoined") extends PokerEvent
 case class UserLeft(userName: String, eventType: String = "userLeft") extends PokerEvent
 
 case class RequestStartEstimation(userName: String, taskName: String, startDate: String, eventType: String = "startEstimation") extends PokerEvent
