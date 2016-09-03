@@ -121,6 +121,7 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
                                actorRef: ActorRef): (UserMap, UserMap) = {
     broadcast(UserJoined(newUser, actorRef, isSpectator))
     participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
+    spectators.foreach(p => actorRef ! UserJoined(p._1, p._2, isSpectator = true))
 
     // update participants or spectators
     val users = isSpectator match {

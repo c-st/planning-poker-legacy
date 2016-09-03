@@ -193,6 +193,7 @@ class PokerRoomActorTest
     val roomRef = system.actorOf(Props(classOf[PokerRoomActor], "estimation-test-room-spectators"))
     val userA = TestProbe()
     val userB = TestProbe()
+    val userC = TestProbe()
     val spectator = TestProbe()
 
     "setup" in {
@@ -214,6 +215,25 @@ class PokerRoomActorTest
         UserJoined("userA", userA.ref,  isSpectator = false),
         UserJoined("userB", userB.ref,  isSpectator = false)
       )
+    }
+
+    "spectators are sent to new users" in {
+      roomRef ! UserJoined("userC", userC.ref)
+
+      userC.expectMsgAllOf(
+        UserJoined("userA", userA.ref, isSpectator = false),
+        UserJoined("userB", userB.ref, isSpectator = false),
+        UserJoined("spectator", spectator.ref, isSpectator = true)
+      )
+
+      userA.expectMsg(UserJoined("userC", userC.ref))
+      userB.expectMsg(UserJoined("userC", userC.ref))
+      spectator.expectMsg(UserJoined("userC", userC.ref))
+
+      roomRef ! UserLeft("userC")
+      userA.expectMsg(UserLeft("userC"))
+      userB.expectMsg(UserLeft("userC"))
+      spectator.expectMsg(UserLeft("userC"))
     }
 
     "spectator can initiate estimation, but cannot vote" in {
