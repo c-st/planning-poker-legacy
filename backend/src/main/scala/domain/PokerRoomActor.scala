@@ -16,9 +16,9 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   def receive = idle
 
   def idle: Receive = {
-    case UserJoined(name, actorRef, _) =>
-      participants = handleUserJoined(participants, None, name, actorRef)
-      log.info(s"[$roomId] User $name joined room.")
+    case UserJoined(name, actorRef, isSpectator, _) =>
+      participants = handleUserJoined(participants, None, name, isSpectator, actorRef)
+      log.info(s"[$roomId] User $name joined room (spectator: $isSpectator).")
 
     case UserLeft(name, _) =>
       participants = handleUserLeft(participants, name)
@@ -36,9 +36,9 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   }
 
   def estimating(currentTask: String, estimationStart: DateTime): Receive = {
-    case UserJoined(name, actorRef, _) =>
-      participants = handleUserJoined(participants, Some(currentTask), name, actorRef)
-      log.info(s"[$roomId] User $name joined room during an ongoing estimation.")
+    case UserJoined(name, actorRef, isSpectator, _) =>
+      participants = handleUserJoined(participants, Some(currentTask), name, isSpectator, actorRef)
+      log.info(s"[$roomId] User $name joined room during an ongoing estimation (spectator: $isSpectator).")
 
     case UserLeft(name, _) =>
       participants = handleUserLeft(participants, name)
@@ -65,14 +65,12 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
     case RequestShowEstimationResult(name, _) =>
       log.info(s"Cannot show results. There are still outstanding votes.")
-      // remove the following once spectator mode is available:
-      context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
   }
 
   def finishedEstimating(task: String, estimationStart: DateTime, estimationEnd: DateTime): Receive = {
-    case UserJoined(name, actorRef, _) =>
-      participants = handleUserJoined(participants, Some(task), name, actorRef)
-      log.info(s"[$roomId] User $name joined room.")
+    case UserJoined(name, actorRef, isSpectator, _) =>
+      participants = handleUserJoined(participants, Some(task), name, isSpectator, actorRef)
+      log.info(s"[$roomId] User $name joined room (spectator: $isSpectator).")
       context.become(estimating(task, estimationStart))
 
     case UserLeft(name, _) =>
@@ -97,8 +95,12 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
       context.become(idle)
   }
 
-  private def handleUserJoined(participants: Map[String, ActorRef], task: Option[String], newUser: String, actorRef: ActorRef): Map[String, ActorRef] = {
-    broadcast(UserJoined(newUser, actorRef))
+  private def handleUserJoined(participants: Map[String, ActorRef],
+                               task: Option[String],
+                               newUser: String,
+                               isSpectator: Boolean,
+                               actorRef: ActorRef): Map[String, ActorRef] = {
+    broadcast(UserJoined(newUser, actorRef, isSpectator))
     participants.foreach(p => actorRef ! UserJoined(p._1, p._2))
 
     // add user to participants

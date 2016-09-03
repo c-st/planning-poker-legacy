@@ -38,7 +38,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
         val pokerRoomActorSink = Sink.actorRef[PokerEvent](pokerRoomActor, UserLeft(user))
         val merge = builder.add(Merge[PokerEvent](2))
-        val actorConnected = Flow[ActorRef].map(UserJoined(user, _))
+        val actorConnected = Flow[ActorRef].map(UserJoined(user, _, isSpectator))
 
         builder.materializedValue ~> actorConnected ~> merge.in(1)
         fromWebsocket ~> merge.in(0)
@@ -69,7 +69,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
   private def mapToOutgoingTextMessage(pokerEvent: PokerEvent): TextMessage = {
     pokerEvent match {
-      case UserJoined(name, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
+      case UserJoined(name, _, _, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserJoined]))
       case UserLeft(name, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserLeft]))
       case RequestStartEstimation(name, taskName, startDate, _) => TextMessage(toJson(pokerEvent.asInstanceOf[RequestStartEstimation]))
       case UserHasEstimated(name, taskName, _) => TextMessage(toJson(pokerEvent.asInstanceOf[UserHasEstimated]))
