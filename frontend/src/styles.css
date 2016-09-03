@@ -11,8 +11,8 @@ html, body {
 }
 
 .estimation-button-container > button {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   float: left;
-  margin: 15px;
+  margin: 10px;
 }

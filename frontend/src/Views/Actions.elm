@@ -37,8 +37,7 @@ actionsView model =
 
         showResultView =
             div []
-                [ h4 [] [ text "Show current estimation" ]
-                , button
+                [ button
                     [ class "h6 btn btn-outline"
                     , onClick RequestShowResult
                     ]

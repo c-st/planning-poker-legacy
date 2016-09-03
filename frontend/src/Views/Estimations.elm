@@ -31,7 +31,7 @@ estimationButton estimate model =
             [ class ("btn " ++ buttonClass)
             , onClick (PerformEstimation estimate)
             ]
-            [ text ("Estimate " ++ estimate) ]
+            [ text estimate ]
 
 
 estimationView : Model -> Html Msg
