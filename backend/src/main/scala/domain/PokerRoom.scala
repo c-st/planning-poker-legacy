@@ -18,7 +18,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     Props(classOf[PokerRoomActor], roomId)
   )
 
-  def websocketFlow(user: String): Flow[Message, Message, _] = {
+  def websocketFlow(user: String, isSpectator: Boolean): Flow[Message, Message, _] = {
     val source = Source.actorRef[PokerEvent](1, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
@@ -29,7 +29,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
         // TextMessage -> PokerEvent
         val fromWebsocket = builder.add(
           Flow[Message].collect {
-            case TextMessage.Strict(textContent) => mapToIncomingPokerEvent(user, textContent)
+            case TextMessage.Strict(textContent) => mapToIncomingPokerEvent(user, isSpectator, textContent)
           })
 
         // PokerEvent -> TextMessage
@@ -53,7 +53,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
 
   def sendMessage(message: PokerMessage): Unit = pokerRoomActor ! message
 
-  private def mapToIncomingPokerEvent(user: String, textContent: String): PokerEvent = {
+  private def mapToIncomingPokerEvent(user: String, isSpectator: Boolean, textContent: String): PokerEvent = {
     val incomingMessage = JSON.parseFull(textContent) match {
       case Some(map: Map[_, Any]) => map.asInstanceOf[Map[String, Any]]
       case _ => Map("eventType" -> "unknown")
