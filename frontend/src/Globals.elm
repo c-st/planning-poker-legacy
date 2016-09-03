@@ -15,4 +15,4 @@ planningPokerServerUrl model =
         isSpectator =
             toString model.user.isSpectator
     in
-        ("ws:/planninpoker.cc/poker/" ++ roomId ++ "?name=" ++ name ++ "&spectator=" ++ isSpectator)
+        ("ws:/planningpoker.cc/poker/" ++ roomId ++ "?name=" ++ name ++ "&spectator=" ++ isSpectator)
