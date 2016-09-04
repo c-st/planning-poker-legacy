@@ -1,24 +1,37 @@
-module Views.Actions exposing (actionsView)
+module Views.Task exposing (taskView)
 
-import Model exposing (User, Model, Task, Page(..), Msg(..), State(..))
+import Model exposing (User, Model, Task, Page(..), Msg(..), State(..), emptyTask)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Date exposing (fromTime)
+import Time exposing (inSeconds, inMinutes)
 
 
-actionsView : Model -> Html Msg
-actionsView model =
+taskView : Model -> Html Msg
+taskView model =
     let
         user =
             model.user
 
+        task =
+            Maybe.withDefault emptyTask model.currentTask
+
+        minutes =
+            (floor <| inMinutes model.elapsedTime) `rem` 60
+
+        seconds =
+            (floor <| inSeconds model.elapsedTime) `rem` 60
+
+        elapsedTime =
+            (toString minutes) ++ ":" ++ (toString seconds)
+
         startEstimationView =
-            div []
+            div [ class "" ]
                 [ input
                     [ type' "text"
                     , placeholder "Task name"
-                    , class "block col-12 mb1 input"
+                    , class "block col-3 mb1 input"
                     , onInput SetNewTaskName
                     , value model.newTaskName
                     ]
@@ -35,6 +48,13 @@ actionsView model =
                     ]
                 ]
 
+        estimatingView =
+            div []
+                [ h2 [] [ text task.name ]
+                , text <| "Elapsed: " ++ elapsedTime
+                , showResultView
+                ]
+
         showResultView =
             div []
                 [ button
@@ -47,11 +67,11 @@ actionsView model =
                 ]
     in
         case model.uiState of
-            Estimate ->
-                showResultView
-
             Initial ->
                 startEstimationView
+
+            Estimate ->
+                estimatingView
 
             ShowResult ->
                 startEstimationView

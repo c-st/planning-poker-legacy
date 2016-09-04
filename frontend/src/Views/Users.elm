@@ -13,8 +13,7 @@ currentUserView model =
             model.user
     in
         div []
-            [ h4 [] [ text ("User: " ++ user.name) ]
-            , button
+            [ button
                 [ class "h6 btn btn-outline"
                 , onClick LeaveRoom
                 ]
@@ -27,19 +26,26 @@ currentUserView model =
 usersView : Model -> Html Msg
 usersView model =
     let
-        users =
-            model.user :: model.users
+        currentUser =
+            model.user
+
+        allUsers =
+            currentUser :: model.users
 
         sortedUsers =
-            List.sortBy .name users
+            List.sortBy .name allUsers
+
+        viewUserWithHighlight =
+            viewUser currentUser
     in
         div []
-            [ ul [ class "list-reset" ] (List.map viewUser sortedUsers)
+            [ h3 [] [ text "Users" ]
+            , ul [ class "list-reset" ] (List.map viewUserWithHighlight sortedUsers)
             ]
 
 
-viewUser : User -> Html msg
-viewUser user =
+viewUser : User -> User -> Html msg
+viewUser currentUser user =
     let
         cssClass =
             if user.hasEstimated then
@@ -48,8 +54,14 @@ viewUser user =
                 "mr1 fa fa-eye"
             else
                 ""
+
+        nameAddon =
+            if currentUser.name == user.name then
+                " (you)"
+            else
+                ""
     in
         li []
             [ i [ class cssClass ] []
-            , text user.name
+            , text <| user.name ++ nameAddon
             ]

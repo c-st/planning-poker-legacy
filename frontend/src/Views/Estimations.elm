@@ -6,7 +6,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Dict exposing (..)
 import Dict.Extra exposing (groupBy)
-import Time exposing (inSeconds, inMinutes)
 import String
 
 
@@ -45,15 +44,6 @@ estimationView model =
                 task =
                     Maybe.withDefault emptyTask model.currentTask
 
-                minutes =
-                    (floor <| inMinutes model.elapsedTime) `rem` 60
-
-                seconds =
-                    (floor <| inSeconds model.elapsedTime) `rem` 60
-
-                elapsedTime =
-                    (toString minutes) ++ ":" ++ (toString seconds)
-
                 buttons =
                     List.map
                         (\estimate ->
@@ -74,9 +64,7 @@ estimationView model =
                         estimationView
             in
                 div []
-                    [ h4 [] [ text task.name ]
-                    , text <| "Elapsed: " ++ elapsedTime
-                    , view
+                    [ view
                     ]
 
         ShowResult ->
