@@ -11,15 +11,13 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
   var participants: UserMap = Map.empty[String, ActorRef]
   var spectators: UserMap = Map.empty[String, ActorRef]
-
-  var estimationStart: DateTime = DateTime.now
   var estimations: Estimations = Map.empty[String, Map[String, String]]
 
   def receive = idle
 
   def idle: Receive = {
     case UserJoined(name, actorRef, isSpectator, _) =>
-      val updatedUsers = handleUserJoined(participants, spectators, None, name, isSpectator, actorRef)
+      val updatedUsers = handleUserJoined(participants, spectators, None, None, name, isSpectator, actorRef)
       participants = updatedUsers._1
       spectators = updatedUsers._2
       log.info(s"[$roomId] User $name joined room (spectator: $isSpectator).")
@@ -43,7 +41,8 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
   def estimating(currentTask: String, estimationStart: DateTime): Receive = {
     case UserJoined(name, actorRef, isSpectator, _) =>
-      val updatedUsers = handleUserJoined(participants, spectators, Some(currentTask), name, isSpectator, actorRef)
+      val updatedUsers = handleUserJoined(participants, spectators,
+        Some(currentTask), Some(estimationStart), name, isSpectator, actorRef)
       participants = updatedUsers._1
       spectators = updatedUsers._2
       log.info(s"[$roomId] User $name joined room during an ongoing estimation (spectator: $isSpectator).")
@@ -81,7 +80,8 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
 
   def finishedEstimating(task: String, estimationStart: DateTime, estimationEnd: DateTime): Receive = {
     case UserJoined(name, actorRef, isSpectator, _) =>
-      val updatedUsers = handleUserJoined(participants, spectators, Some(task), name, isSpectator, actorRef)
+      val updatedUsers = handleUserJoined(participants, spectators,
+        Some(task), Some(estimationStart), name, isSpectator, actorRef)
       participants = updatedUsers._1
       spectators = updatedUsers._2
       log.info(s"[$roomId] User $name joined room (spectator: $isSpectator).")
@@ -116,6 +116,7 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
   private def handleUserJoined(participants: UserMap,
                                spectators: UserMap,
                                task: Option[String],
+                               estimationStart: Option[DateTime],
                                newUser: String,
                                isSpectator: Boolean,
                                actorRef: ActorRef): (UserMap, UserMap) = {
@@ -132,7 +133,7 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
     // broadcast current task and estimation status
     task match {
       case Some(justTask) => {
-        actorRef ! RequestStartEstimation("", justTask, estimationStart.toIsoDateTimeString())
+        actorRef ! RequestStartEstimation("", justTask, estimationStart.getOrElse(DateTime.now).toIsoDateTimeString())
         currentEstimations(justTask).foreach(estimation => actorRef ! UserHasEstimated(estimation._1, justTask))
         users
       }
