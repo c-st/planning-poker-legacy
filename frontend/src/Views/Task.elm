@@ -27,7 +27,11 @@ taskView model =
             (toString minutes) ++ ":" ++ (toString seconds)
 
         startEstimationView =
-            div [ class "" ]
+            Html.form
+                [ onSubmit <|
+                    RequestStartEstimation <|
+                        Task model.newTaskName (Date.fromTime 0)
+                ]
                 [ input
                     [ type' "text"
                     , placeholder "Task name"
@@ -38,10 +42,7 @@ taskView model =
                     []
                 , button
                     [ class "h6 btn btn-outline"
-                    , onClick
-                        (RequestStartEstimation
-                            (Task model.newTaskName (Date.fromTime 0))
-                        )
+                    , type' "submit"
                     ]
                     [ i [ class "fa fa-play mr1" ] []
                     , text "Start estimation"
@@ -49,7 +50,7 @@ taskView model =
                 ]
 
         estimatingView =
-            div []
+            div [ class "p1" ]
                 [ h2 [] [ text task.name ]
                 , text <| "Elapsed: " ++ elapsedTime
                 , showResultView
