@@ -1,4 +1,4 @@
-module Views.Users exposing (usersView, currentUserView)
+module Views.Users exposing (usersView, logoutButton)
 
 import Model exposing (User, Model, Msg(..))
 import Html exposing (..)
@@ -6,20 +6,18 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
-currentUserView : Model -> Html Msg
-currentUserView model =
+logoutButton : Model -> Html Msg
+logoutButton model =
     let
         user =
             model.user
     in
-        div []
-            [ button
-                [ class "h6 btn btn-outline"
-                , onClick LeaveRoom
-                ]
-                [ i [ class "fa fa-sign-out mr1" ] []
-                , text "Leave room"
-                ]
+        button
+            [ class "btn btn-outline"
+            , onClick LeaveRoom
+            ]
+            [ i [ class "fa fa-sign-out mr1" ] []
+            , text "Leave room"
             ]
 
 

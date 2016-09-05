@@ -72,7 +72,7 @@ taskView model =
         estimatingView =
             div [ class "flex" ]
                 [ h2 [ class "flex-auto m1 " ] [ text task.name ]
-                , h2 [ class "m1" ] [ text elapsedTime ]
+                , h2 [ class "m1" ] [ text elapsedTime, i [ class "fa fa-clock-o ml1" ] [] ]
                 , showResultView
                 ]
     in

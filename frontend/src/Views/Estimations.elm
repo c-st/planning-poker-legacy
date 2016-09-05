@@ -18,7 +18,7 @@ estimationView : Model -> Html Msg
 estimationView model =
     case model.uiState of
         Initial ->
-            div [] [ h2 [ class "m0" ] [ text "Start estimating for a new task." ] ]
+            div [] [ h2 [ class "m0" ] [ text "Start estimating for a new task ⤴" ] ]
 
         Estimate ->
             let
@@ -36,7 +36,7 @@ estimationView model =
                     div [ class "estimation-button-container" ] buttons
 
                 spectatorView =
-                    div [] [ h2 [] [ text "Estimation is ongoing" ] ]
+                    div [] [ h2 [] [ text "Estimation is running..." ] ]
 
                 view =
                     if model.user.isSpectator then
