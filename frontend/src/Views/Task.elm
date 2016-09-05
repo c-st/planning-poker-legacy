@@ -28,23 +28,24 @@ taskView model =
 
         startEstimationView =
             Html.form
-                [ onSubmit <|
+                [ class "flex flex-center"
+                , onSubmit <|
                     RequestStartEstimation <|
                         Task model.newTaskName (Date.fromTime 0)
                 ]
                 [ input
                     [ type' "text"
                     , placeholder "Task name"
-                    , class "block col-3 mb1 input"
+                    , class "flex-auto col-3 input m1"
                     , onInput SetNewTaskName
                     , value model.newTaskName
                     ]
                     []
                 , button
-                    [ class "h6 btn btn-outline"
+                    [ class "btn btn-outline m1"
                     , type' "submit"
                     ]
-                    [ i [ class "fa fa-play mr1" ] []
+                    [ i [ class "fa fa-play" ] []
                     , text "Start estimation"
                     ]
                 ]

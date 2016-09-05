@@ -12,15 +12,15 @@ planningPokerPageContent : Model -> Html Msg
 planningPokerPageContent model =
     div [ class "flex full-height" ]
         [ div [ class "flex-none col-2 p1" ]
-            [ h1 [] [ text "Planning Poker" ]
+            [ h1 [ class "m0" ] [ text "Planning Poker" ]
             , usersView model
             , currentUserView model
             ]
         , div [ class "flex flex-auto flex-stretch flex-column p1" ]
-            [ div [ class "actions-container mb2" ]
+            [ div [ class "" ]
                 [ taskView model
                 ]
-            , div [ class "flex-auto" ]
+            , div [ class "flex-auto p1" ]
                 [ estimationView model
                 ]
             ]

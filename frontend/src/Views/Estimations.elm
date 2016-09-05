@@ -14,30 +14,11 @@ possibleEstimations =
     [ "0", "1", "2", "3", "5", "8", "13", "20", "40", "100" ]
 
 
-estimationButton : String -> Model -> Html Msg
-estimationButton estimate model =
-    let
-        currentEstimation =
-            Maybe.withDefault "" model.user.estimation
-
-        buttonClass =
-            if currentEstimation == estimate then
-                "bg-green btn-primary"
-            else
-                "btn-outline"
-    in
-        button
-            [ class ("btn " ++ buttonClass)
-            , onClick (PerformEstimation estimate)
-            ]
-            [ text estimate ]
-
-
 estimationView : Model -> Html Msg
 estimationView model =
     case model.uiState of
         Initial ->
-            div [] [ text "Start estimating for a new task." ]
+            div [] [ h2 [ class "m0" ] [ text "Start estimating for a new task." ] ]
 
         Estimate ->
             let
@@ -55,7 +36,7 @@ estimationView model =
                     div [ class "estimation-button-container" ] buttons
 
                 spectatorView =
-                    div [] [ text "Estimation is ongoing" ]
+                    div [] [ h2 [] [ text "Estimation is ongoing" ] ]
 
                 view =
                     if model.user.isSpectator then
@@ -120,3 +101,22 @@ estimationView model =
                         , tbody [] rows
                         ]
                     ]
+
+
+estimationButton : String -> Model -> Html Msg
+estimationButton estimate model =
+    let
+        currentEstimation =
+            Maybe.withDefault "" model.user.estimation
+
+        buttonClass =
+            if currentEstimation == estimate then
+                "bg-green btn-primary"
+            else
+                "btn-outline"
+    in
+        button
+            [ class ("btn " ++ buttonClass)
+            , onClick (PerformEstimation estimate)
+            ]
+            [ text estimate ]
