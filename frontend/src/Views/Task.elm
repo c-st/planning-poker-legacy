@@ -8,6 +8,14 @@ import Date exposing (fromTime)
 import Time exposing (inSeconds, inMinutes)
 
 
+formatTimeComponent : Int -> String
+formatTimeComponent number =
+    if number < 10 then
+        "0" ++ toString number
+    else
+        toString number
+
+
 taskView : Model -> Html Msg
 taskView model =
     let
@@ -24,7 +32,7 @@ taskView model =
             (floor <| inSeconds model.elapsedTime) `rem` 60
 
         elapsedTime =
-            (toString minutes) ++ ":" ++ (toString seconds)
+            (formatTimeComponent minutes) ++ ":" ++ (formatTimeComponent seconds)
 
         startEstimationView =
             Html.form
@@ -45,27 +53,27 @@ taskView model =
                     [ class "btn btn-outline m1"
                     , type' "submit"
                     ]
-                    [ i [ class "fa fa-play" ] []
+                    [ i [ class "fa fa-play mr1" ] []
                     , text "Start estimation"
                     ]
-                ]
-
-        estimatingView =
-            div [ class "p1" ]
-                [ h2 [] [ text task.name ]
-                , text <| "Elapsed: " ++ elapsedTime
-                , showResultView
                 ]
 
         showResultView =
             div []
                 [ button
-                    [ class "h6 btn btn-outline"
+                    [ class "btn btn-outline m1"
                     , onClick RequestShowResult
                     ]
                     [ i [ class "fa fa-eye mr1" ] []
                     , text "Show result"
                     ]
+                ]
+
+        estimatingView =
+            div [ class "flex" ]
+                [ h2 [ class "flex-auto m1 " ] [ text task.name ]
+                , h2 [ class "m1" ] [ text elapsedTime ]
+                , showResultView
                 ]
     in
         case model.uiState of
