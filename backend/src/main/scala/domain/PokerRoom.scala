@@ -19,7 +19,7 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
   )
 
   def websocketFlow(user: String, isSpectator: Boolean): Flow[Message, Message, _] = {
-    val source = Source.actorRef[PokerEvent](1, OverflowStrategy.fail)
+    val source = Source.actorRef[PokerEvent](32, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
       implicit builder => { responseSource =>
