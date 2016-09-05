@@ -146,7 +146,6 @@ update msg model =
                     , users = []
                     , currentEstimations = []
                     , elapsedTime = 0
-                    , roomId = ""
                     , user = updatedUser
                     , currentTask = Nothing
                     , activePage = LandingPage

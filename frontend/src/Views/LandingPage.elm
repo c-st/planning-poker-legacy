@@ -38,17 +38,17 @@ landingPageContent model =
             []
         , label
             [ for "isSpectator"
-            , class "label"
+            , class "block col-12 mb2"
             ]
-            [ text "Join as spectator" ]
-        , input
-            [ id "isSpectator"
-            , type' "checkbox"
-            , class "block col-12 mb1 input"
-            , checked model.user.isSpectator
-            , onCheck SetSpectator
+            [ input
+                [ id "isSpectator"
+                , type' "checkbox"
+                , checked model.user.isSpectator
+                , onCheck SetSpectator
+                ]
+                []
+            , text "Join as spectator"
             ]
-            []
         , button
             [ class "h6 btn btn-primary"
             , type' "submit"
