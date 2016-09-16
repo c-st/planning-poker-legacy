@@ -20,7 +20,7 @@ mainContent model =
         LandingPage ->
             div [ class "flex flex-center" ]
                 [ div
-                    [ class "p2 m2 mx-auto rounded bg-silver col-6" ]
+                    [ class "pa2 ma2 col-6" ]
                     [ landingPageContent model ]
                 ]
 
