@@ -80,18 +80,21 @@ estimationView model =
 
                                 userNames =
                                     String.join ", " <| List.map (\user -> user.name) votes
+
+                                userIcons =
+                                    List.map (\u -> i [ class "fa fa-user" ] []) votes
                             in
                                 tr []
                                     [ td [] [ text key ]
-                                    , td [] [ text <| toString <| List.length votes ]
+                                    , td [] userIcons
                                     , td [] [ text userNames ]
                                     ]
                         )
                         keysSortedDescending
             in
                 div []
-                    [ table [ class "table-light" ]
-                        [ thead []
+                    [ table [ class "table-light overflow-hidden rounded" ]
+                        [ thead [ class "bg-darken-1" ]
                             [ tr []
                                 [ th [] [ text "Complexity" ]
                                 , th [] [ text "Count" ]
