@@ -93,7 +93,7 @@ estimationView model =
                     [ table [ class "table-light" ]
                         [ thead []
                             [ tr []
-                                [ th [] [ text "Effort" ]
+                                [ th [] [ text "Complexity" ]
                                 , th [] [ text "Count" ]
                                 , th [] [ text "Users" ]
                                 ]

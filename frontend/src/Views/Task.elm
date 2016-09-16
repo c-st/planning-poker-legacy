@@ -54,7 +54,7 @@ taskView model =
                     , type' "submit"
                     ]
                     [ i [ class "fa fa-play mr1" ] []
-                    , text "Start estimation"
+                    , text "Start"
                     ]
                 ]
 
