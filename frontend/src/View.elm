@@ -12,7 +12,7 @@ view model =
     case model.activePage of
         LandingPage ->
             div [ class "full-height m0 p0 flex flex-column" ]
-                [ header [ class "px3 py4 white p3 border-silver border-bottom bg-blue" ]
+                [ header [ class "px3 py4 center white p3 border-silver border-bottom bg-blue" ]
                     [ h1 [ class "m0 h0-responsive mt2 mb0 bold" ] [ text "Planning Poker" ]
                     ]
                 , main'
@@ -22,7 +22,7 @@ view model =
                             [ class "sm-col sm-col-3 p1 m0" ]
                             [ text "" ]
                         , div
-                            [ class "sm-col sm-col-6 mt3 px2 border-silver p2" ]
+                            [ class "sm-col sm-col-6 mt3 mb3 px2 border-silver p2" ]
                             [ landingPageContent model ]
                         ]
                     ]
