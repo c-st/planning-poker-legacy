@@ -96,7 +96,19 @@ update msg model =
             )
 
         SetRoomId newRoomId ->
-            ( { model | roomId = newRoomId }, Cmd.none )
+            case model.roomJoined of
+                True ->
+                    -- logout when changing room while being logged in (browser back button)
+                    ( { model
+                        | roomJoined = False
+                        , roomId = newRoomId
+                        , activePage = LandingPage
+                      }
+                    , Cmd.none
+                    )
+
+                False ->
+                    ( { model | roomId = newRoomId }, Cmd.none )
 
         SetUserName newName ->
             ( { model | user = (User newName False False Nothing) }, Cmd.none )
