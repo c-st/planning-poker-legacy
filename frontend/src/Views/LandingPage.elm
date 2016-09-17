@@ -9,7 +9,7 @@ import Html.Events exposing (..)
 landingPageContent : Model -> Html Msg
 landingPageContent model =
     Html.form [ onSubmit <| JoinRoom ]
-        [ h2 [] [ text "Join a room" ]
+        [ h1 [ class "mt1" ] [ text "Join a room" ]
         , label
             [ for "roomId"
             , class "label"

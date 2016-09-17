@@ -1,11 +1,5 @@
-// require('ace-css/css/ace.css');
-
-require('tachyons/css/tachyons.css');
-require('tachyons-spacing/css/tachyons-spacing.css');
-require('tachyons-flexbox/css/tachyons-flexbox.css');
-
+require('ace-css/css/ace.css');
 require('font-awesome/css/font-awesome.css');
-
 require('./styles.css');
 require('./index.html');
 
