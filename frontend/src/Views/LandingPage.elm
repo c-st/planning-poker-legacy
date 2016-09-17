@@ -9,7 +9,7 @@ import Html.Events exposing (..)
 landingPageContent : Model -> Html Msg
 landingPageContent model =
     Html.form [ onSubmit <| JoinRoom ]
-        [ h2 [] [ text "Join a room" ]
+        [ h2 [ class "mt1 mb3 center" ] [ text "Join a room" ]
         , label
             [ for "roomId"
             , class "label"
@@ -18,7 +18,7 @@ landingPageContent model =
         , input
             [ id "roomId"
             , type' "text"
-            , class "block col-12 mb1 input"
+            , class "block col-12 mb2 input"
             , onInput SetRoomId
             , value model.roomId
             ]
@@ -31,14 +31,14 @@ landingPageContent model =
         , input
             [ id "userName"
             , type' "text"
-            , class "block col-12 mb1 input"
+            , class "block col-12 mb2 input"
             , onInput SetUserName
             , value model.user.name
             ]
             []
         , label
             [ for "isSpectator"
-            , class "block col-12 mb2"
+            , class "block col-12 mb3"
             ]
             [ input
                 [ id "isSpectator"
@@ -50,10 +50,10 @@ landingPageContent model =
             , text "Join as spectator"
             ]
         , button
-            [ class "h6 btn btn-primary"
+            [ class "h4 btn btn-primary right"
             , type' "submit"
             ]
-            [ text "Join room" ]
+            [ text "Join" ]
         ]
 
 

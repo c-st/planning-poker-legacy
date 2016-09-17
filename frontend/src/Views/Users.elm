@@ -37,7 +37,7 @@ usersView model =
             viewUser currentUser
     in
         div []
-            [ h3 [] [ text "Users" ]
+            [ h3 [ class "mt1" ] [ text "Users" ]
             , ul [ class "list-reset" ] (List.map viewUserWithHighlight sortedUsers)
             ]
 

@@ -18,7 +18,7 @@ estimationView : Model -> Html Msg
 estimationView model =
     case model.uiState of
         Initial ->
-            div [] [ h2 [ class "m0" ] [ text "Start estimating for a new task ⤴" ] ]
+            div [] [ h3 [ class "m0" ] [ text "Start estimating for a new task ⤴" ] ]
 
         Estimate ->
             let

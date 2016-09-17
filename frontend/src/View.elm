@@ -9,19 +9,24 @@ import Views.PokerRoomPage exposing (planningPokerPageContent)
 
 view : Model -> Html Msg
 view model =
-    div
-        [ class "flex flex-column full-height" ]
-        [ mainContent model ]
-
-
-mainContent : Model -> Html Msg
-mainContent model =
     case model.activePage of
         LandingPage ->
-            div [ class "flex flex-center" ]
-                [ div
-                    [ class "p2 m2 mx-auto rounded bg-silver col-6" ]
-                    [ landingPageContent model ]
+            div [ class "full-height m0 p0 flex flex-column" ]
+                [ header [ class "px3 py4 center white p3 border-silver border-bottom bg-blue" ]
+                    [ h1 [ class "m0 h0-responsive mt2 mb0 bold" ] [ text "Planning Poker" ]
+                    ]
+                , main'
+                    [ class "flex-auto" ]
+                    [ section [ class "container" ]
+                        [ div
+                            [ class "sm-col sm-col-3 p1 m0" ]
+                            [ text "" ]
+                        , div
+                            [ class "sm-col sm-col-6 mt3 mb3 px2 border-silver p2" ]
+                            [ landingPageContent model ]
+                        ]
+                    ]
+                , footer [ class "p2 pt3 center gray border-silver border-top" ] [ text "Footer" ]
                 ]
 
         PlanningPokerRoom ->
