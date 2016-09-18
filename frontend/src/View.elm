@@ -26,7 +26,7 @@ view model =
                             [ landingPageContent model ]
                         ]
                     ]
-                , footer [ class "p2 pt3 center gray border-silver border-top" ] [ text "Footer" ]
+                , footer [ class "p2 pt3 center gray border-silver border-top" ] [ text "" ]
                 ]
 
         PlanningPokerRoom ->
