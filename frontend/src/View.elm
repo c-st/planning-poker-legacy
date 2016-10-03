@@ -26,7 +26,9 @@ view model =
                             [ landingPageContent model ]
                         ]
                     ]
-                , footer [ class "p2 pt3 center gray border-silver border-top" ] [ text "" ]
+                , footer [ class "p2 mb1 pt3 center gray border-silver border-top" ]
+                    [ a [ href "http://timer.planningpoker.cc" ] [ text "Timer" ]
+                    ]
                 ]
 
         PlanningPokerRoom ->
