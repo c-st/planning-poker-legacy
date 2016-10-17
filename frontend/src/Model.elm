@@ -15,6 +15,11 @@ type State
     | ShowResult
 
 
+type HealthStatus
+    = Healthy
+    | Zombie
+
+
 type alias User =
     { name : String
     , isSpectator : Bool
@@ -26,6 +31,12 @@ type alias User =
 type alias Task =
     { name : String
     , startDate : Date
+    }
+
+
+type alias Health =
+    { status : HealthStatus
+    , missedHeartbeats : Int
     }
 
 
@@ -42,6 +53,7 @@ type alias Model =
     , currentEstimations : List User
     , currentTask : Maybe Task
     , elapsedTime : Time
+    , health : Health
     }
 
 
@@ -60,6 +72,7 @@ init =
         []
         Nothing
         0
+        (Health Healthy 0)
     , Cmd.none
     )
 
@@ -72,6 +85,8 @@ type Msg
     | JoinRoom
     | LeaveRoom
     | TimerTick Time
+    | ServerHeartbeat
+    | HealthCheckTick Time
     | IncomingEvent String
       -- is being decoded and mapped to these:
     | UnexpectedPayload String
