@@ -25,6 +25,9 @@ payloadDecoder =
         `andThen`
             \eventType ->
                 case eventType of
+                    "keepAlive" ->
+                        JD.succeed ServerHeartbeat
+
                     "userJoined" ->
                         JD.map UserJoined
                             (JD.object4 User

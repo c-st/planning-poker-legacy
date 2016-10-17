@@ -1,7 +1,7 @@
 module Update exposing (..)
 
 import Globals exposing (planningPokerServerUrl)
-import Model exposing (User, Task, Model, Page(..), Msg(..), State(..), emptyTask)
+import Model exposing (User, Task, Model, Page(..), Msg(..), State(..), HealthStatus(..), Health, emptyTask)
 import JsonCoding
     exposing
         ( decodePayload
@@ -48,6 +48,29 @@ sendPayload model payload =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        ServerHeartbeat ->
+            let
+                newHealth =
+                    Health Healthy 0
+            in
+                ( { model | health = newHealth }, Cmd.none )
+
+        HealthCheckTick _ ->
+            let
+                missedHeartbeats =
+                    model.health.missedHeartbeats + 1
+
+                healthStatus =
+                    if missedHeartbeats > 5 then
+                        Zombie
+                    else
+                        Healthy
+
+                newHealth =
+                    Health healthStatus missedHeartbeats
+            in
+                ( { model | health = newHealth }, Cmd.none )
+
         SetNewTaskName taskName ->
             ( { model | newTaskName = taskName }, Cmd.none )
 
