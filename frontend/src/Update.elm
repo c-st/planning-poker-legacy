@@ -61,7 +61,7 @@ update msg model =
                     model.health.missedHeartbeats + 1
 
                 healthStatus =
-                    if missedHeartbeats > 5 then
+                    if missedHeartbeats > 4 then
                         Zombie
                     else
                         Healthy

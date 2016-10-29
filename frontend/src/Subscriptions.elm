@@ -35,7 +35,7 @@ subscriptions model =
                 Platform.Sub.none
 
         healthCheckSubscription =
-            Time.every (2 * second) HealthCheckTick
+            Time.every (5 * second) HealthCheckTick
     in
         Sub.batch
             [ webSocketSubscription
