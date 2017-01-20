@@ -8,7 +8,7 @@ RUN \
  apt-get install -y nodejs
 
 # setup elm
-RUN npm install -g elm
+RUN npm install -g elm@0.18.0
 
 # build frontend
 WORKDIR /usr/src/app/frontend
