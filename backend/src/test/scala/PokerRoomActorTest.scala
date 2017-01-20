@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 
 class PokerRoomActorTest
   extends TestKit(ActorSystem("test-system"))
-    with WordSpecLike with Matchers with BeforeAndAfterAll {
+  with WordSpecLike with Matchers with BeforeAndAfterAll {
 
   override def afterAll = {
     shutdown()
@@ -169,7 +169,7 @@ class PokerRoomActorTest
       roomRef ! RequestShowEstimationResult("userA")
 
       val check: PartialFunction[Any, Boolean] = {
-        case EstimationResult("new-task", _, _, estimations, _ ) => {
+        case EstimationResult("new-task", _, _, estimations, _) => {
           assert(estimations.length == 4)
           estimations should contain theSameElementsAs List(
             UserEstimation("userA", "5"),
@@ -212,8 +212,8 @@ class PokerRoomActorTest
       )
 
       spectator.expectMsgAllOf(
-        UserJoined("userA", userA.ref,  isSpectator = false),
-        UserJoined("userB", userB.ref,  isSpectator = false)
+        UserJoined("userA", userA.ref, isSpectator = false),
+        UserJoined("userB", userB.ref, isSpectator = false)
       )
     }
 
@@ -273,7 +273,7 @@ class PokerRoomActorTest
       roomRef ! RequestShowEstimationResult("userA")
 
       val check: PartialFunction[Any, Boolean] = {
-        case EstimationResult("new-task", _, _, estimations, _ ) => {
+        case EstimationResult("new-task", _, _, estimations, _) => {
           assert(estimations.length == 2)
           estimations should contain theSameElementsAs List(
             UserEstimation("userA", "20"),

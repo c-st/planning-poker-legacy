@@ -17,7 +17,7 @@ landingPageContent model =
             [ text "Room ID" ]
         , input
             [ id "roomId"
-            , type' "text"
+            , type_ "text"
             , class "block col-12 mb2 input"
             , onInput SetRoomId
             , value model.roomId
@@ -30,7 +30,7 @@ landingPageContent model =
             [ text "Your name" ]
         , input
             [ id "userName"
-            , type' "text"
+            , type_ "text"
             , class "block col-12 mb2 input"
             , onInput SetUserName
             , value model.user.name
@@ -42,7 +42,7 @@ landingPageContent model =
             ]
             [ input
                 [ id "isSpectator"
-                , type' "checkbox"
+                , type_ "checkbox"
                 , checked model.user.isSpectator
                 , onCheck SetSpectator
                 ]
@@ -51,7 +51,7 @@ landingPageContent model =
             ]
         , button
             [ class "h4 btn btn-primary right"
-            , type' "submit"
+            , type_ "submit"
             ]
             [ text "Join" ]
         ]

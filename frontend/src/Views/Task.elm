@@ -26,10 +26,10 @@ taskView model =
             Maybe.withDefault emptyTask model.currentTask
 
         minutes =
-            (floor <| inMinutes model.elapsedTime) `rem` 60
+            rem (floor <| inMinutes model.elapsedTime) 60
 
         seconds =
-            (floor <| inSeconds model.elapsedTime) `rem` 60
+            rem (floor <| inSeconds model.elapsedTime) 60
 
         elapsedTime =
             (formatTimeComponent minutes) ++ ":" ++ (formatTimeComponent seconds)
@@ -42,7 +42,7 @@ taskView model =
                         Task model.newTaskName (Date.fromTime 0)
                 ]
                 [ input
-                    [ type' "text"
+                    [ type_ "text"
                     , placeholder "Task name"
                     , class "flex-auto col-3 input m1"
                     , onInput SetNewTaskName
@@ -51,7 +51,7 @@ taskView model =
                     []
                 , button
                     [ class "btn btn-outline m1"
-                    , type' "submit"
+                    , type_ "submit"
                     ]
                     [ i [ class "fa fa-play mr1" ] []
                     , text "Start"

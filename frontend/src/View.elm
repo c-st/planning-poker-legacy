@@ -15,7 +15,7 @@ view model =
                 [ header [ class "px3 py4 center white p3 border-silver border-bottom bg-blue" ]
                     [ h1 [ class "m0 h0-responsive mt2 mb0 bold" ] [ text "Planning Poker" ]
                     ]
-                , main'
+                , main_
                     [ class "flex-auto" ]
                     [ section [ class "container" ]
                         [ div

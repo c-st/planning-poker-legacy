@@ -22,32 +22,35 @@ class PokerRoom(roomId: String, actorSystem: ActorSystem) {
     val source = Source.actorRef[PokerEvent](32, OverflowStrategy.fail)
 
     Flow.fromGraph(GraphDSL.create(source) {
-      implicit builder => { responseSource =>
+      implicit builder =>
+        { responseSource =>
 
-        import GraphDSL.Implicits._
+          import GraphDSL.Implicits._
 
-        // TextMessage -> PokerEvent
-        val fromWebsocket = builder.add(
-          Flow[Message].collect {
-            case TextMessage.Strict(textContent) => mapToIncomingPokerEvent(user, isSpectator, textContent)
-          })
+          // TextMessage -> PokerEvent
+          val fromWebsocket = builder.add(
+            Flow[Message].collect {
+              case TextMessage.Strict(textContent) => mapToIncomingPokerEvent(user, isSpectator, textContent)
+            }
+          )
 
-        // PokerEvent -> TextMessage
-        val backToWebsocket = builder.add(
-          Flow[PokerEvent].map(mapToOutgoingTextMessage))
+          // PokerEvent -> TextMessage
+          val backToWebsocket = builder.add(
+            Flow[PokerEvent].map(mapToOutgoingTextMessage)
+          )
 
-        val pokerRoomActorSink = Sink.actorRef[PokerEvent](pokerRoomActor, UserLeft(user))
-        val merge = builder.add(Merge[PokerEvent](2))
-        val actorConnected = Flow[ActorRef].map(UserJoined(user, _, isSpectator))
+          val pokerRoomActorSink = Sink.actorRef[PokerEvent](pokerRoomActor, UserLeft(user))
+          val merge = builder.add(Merge[PokerEvent](2))
+          val actorConnected = Flow[ActorRef].map(UserJoined(user, _, isSpectator))
 
-        builder.materializedValue ~> actorConnected ~> merge.in(1)
-        fromWebsocket ~> merge.in(0)
-        merge ~> pokerRoomActorSink
+          builder.materializedValue ~> actorConnected ~> merge.in(1)
+          fromWebsocket ~> merge.in(0)
+          merge ~> pokerRoomActorSink
 
-        responseSource ~> backToWebsocket
+          responseSource ~> backToWebsocket
 
-        FlowShape.of(fromWebsocket.in, backToWebsocket.out)
-      }
+          FlowShape.of(fromWebsocket.in, backToWebsocket.out)
+        }
     }).keepAlive(FiniteDuration(5, TimeUnit.SECONDS), () => TextMessage(toJson(HeartBeat())))
   }
 

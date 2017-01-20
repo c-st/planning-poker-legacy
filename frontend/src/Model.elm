@@ -88,9 +88,8 @@ type Msg
     | ServerHeartbeat
     | HealthCheckTick Time
     | IncomingEvent String
-      -- is being decoded and mapped to these:
+      -- IncomingEvent is being decoded and mapped to these:
     | UnexpectedPayload String
-      -- todo: handle errors
     | UserJoined User
     | UserLeft User
     | StartEstimation Task
