@@ -18,7 +18,7 @@ planningPokerPageContent model =
             [ header [ class "white mt0 p1 border-silver border-bottom bg-blue mb1" ]
                 [ h1 [ class "m0 h0-responsive mt0 mb0 bold" ] [ text "Planning Poker" ]
                 ]
-            , main' [ class "md-flex flex-auto container" ]
+            , main_ [ class "md-flex flex-auto container" ]
                 [ section [ class "md-flex sm-col sm-col-2 flex-column" ]
                     [ div [ class "flex-auto p1" ] [ usersView model ]
                     , div [ class "p1" ] [ logoutButton model ]
