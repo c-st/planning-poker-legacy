@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.DateTime
 
 import scala.collection.immutable.Map
 
-class PokerRoomActor(roomId: String) extends Actor with ActorLogging{
+class PokerRoomActor(roomId: String) extends Actor with ActorLogging {
   type Estimations = Map[String, Map[String, String]]
   type UserMap = Map[String, ActorRef]
 
