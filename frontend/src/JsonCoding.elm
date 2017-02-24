@@ -31,17 +31,19 @@ payloadDecoder =
 
                     "userJoined" ->
                         JD.map UserJoined
-                            (JD.map4 User
+                            (JD.map5 User
                                 (field "userName" JD.string)
                                 (field "isSpectator" JD.bool)
+                                (JD.succeed False)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
 
                     "userLeft" ->
                         JD.map UserLeft
-                            (JD.map4 User
+                            (JD.map5 User
                                 (field "userName" JD.string)
+                                (JD.succeed False)
                                 (JD.succeed False)
                                 (JD.succeed False)
                                 (JD.succeed Nothing)
@@ -56,10 +58,11 @@ payloadDecoder =
 
                     "userHasEstimated" ->
                         JD.map UserHasEstimated
-                            (JD.map4 User
+                            (JD.map5 User
                                 (field "userName" JD.string)
                                 (JD.succeed False)
                                 (JD.succeed True)
+                                (JD.succeed False)
                                 (JD.succeed Nothing)
                             )
 
@@ -69,10 +72,11 @@ payloadDecoder =
                             (JD.at
                                 [ "estimates" ]
                                 (JD.list
-                                    (JD.map4 User
+                                    (JD.map5 User
                                         (field "userName" JD.string)
                                         (JD.succeed False)
                                         (JD.succeed True)
+                                        (JD.succeed False)
                                         (JD.maybe (field "estimate" JD.string))
                                     )
                                 )

@@ -134,7 +134,14 @@ update msg model =
                     ( { model | roomId = newRoomId }, Cmd.none )
 
         SetUserName newName ->
-            ( { model | user = (User newName False False Nothing) }, Cmd.none )
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user | name = newName }
+            in
+                ( { model | user = updatedUser }, Cmd.none )
 
         SetSpectator isSpectator ->
             let
@@ -143,6 +150,16 @@ update msg model =
 
                 updatedUser =
                     { user | isSpectator = isSpectator }
+            in
+                ( { model | user = updatedUser }, Cmd.none )
+
+        SetShowCats userWantsCats ->
+            let
+                user =
+                    model.user
+
+                updatedUser =
+                    { user | showCats = userWantsCats }
             in
                 ( { model | user = updatedUser }, Cmd.none )
 

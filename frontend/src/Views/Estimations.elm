@@ -11,7 +11,7 @@ import String
 
 possibleEstimations : List String
 possibleEstimations =
-    [ "0", "1", "2", "3", "5", "8", "13", "20", "40", "100" ]
+    [ "0", "1", "2", "3", "5", "8", "13", "20", "40", "100", "???" ]
 
 
 estimationView : Model -> Html Msg
@@ -91,8 +91,22 @@ estimationView model =
                                     ]
                         )
                         keysSortedDescending
+
+                isConsensus =
+                    Dict.size estimationGroups == 1
+
+                consensusView =
+                    case (isConsensus && model.user.showCats) of
+                        True ->
+                            div
+                                [ class "cat-container" ]
+                                [ img [ src "http://thecatapi.com/api/images/get?format=src&type=gif" ] []
+                                ]
+
+                        False ->
+                            div [] [ text "" ]
             in
-                div []
+                div [ class "estimation-container" ]
                     [ table [ class "table-light overflow-hidden rounded" ]
                         [ thead [ class "bg-darken-1" ]
                             [ tr []
@@ -103,6 +117,7 @@ estimationView model =
                             ]
                         , tbody [] rows
                         ]
+                    , consensusView
                     ]
 
 
