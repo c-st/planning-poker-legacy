@@ -7,15 +7,18 @@ import akka.testkit.TestProbe
 import scala.concurrent.duration._
 
 class PokerRoomActorTest
-  extends TestKit(ActorSystem("test-system"))
-  with WordSpecLike with Matchers with BeforeAndAfterAll {
+    extends TestKit(ActorSystem("test-system"))
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterAll {
 
   override def afterAll = {
     shutdown()
   }
 
   "User handling" should {
-    val roomRef = system.actorOf(Props(classOf[PokerRoomActor], "user-test-room"))
+    val roomRef =
+      system.actorOf(Props(classOf[PokerRoomActor], "user-test-room"))
     val userA = TestProbe()
     val userB = TestProbe()
     val userC = TestProbe()
@@ -60,7 +63,8 @@ class PokerRoomActorTest
   }
 
   "Estimation handling" should {
-    val roomRef = system.actorOf(Props(classOf[PokerRoomActor], "estimation-test-room"))
+    val roomRef =
+      system.actorOf(Props(classOf[PokerRoomActor], "estimation-test-room"))
     val userA = TestProbe()
     val userB = TestProbe()
     val userC = TestProbe()
@@ -88,7 +92,9 @@ class PokerRoomActorTest
     }
 
     "broadcast start of estimation" in {
-      roomRef ! RequestStartEstimation("userA", "new-task", "20150102T13:37:00")
+      roomRef ! RequestStartEstimation("userA",
+                                       "new-task",
+                                       "20150102T13:37:00")
 
       val check: PartialFunction[Any, Boolean] = {
         case RequestStartEstimation("userA", "new-task", _, _) => true
@@ -190,7 +196,8 @@ class PokerRoomActorTest
   }
 
   "Estimation with spectator" should {
-    val roomRef = system.actorOf(Props(classOf[PokerRoomActor], "estimation-test-room-spectators"))
+    val roomRef = system.actorOf(
+      Props(classOf[PokerRoomActor], "estimation-test-room-spectators"))
     val userA = TestProbe()
     val userB = TestProbe()
     val userC = TestProbe()
@@ -237,7 +244,9 @@ class PokerRoomActorTest
     }
 
     "spectator can initiate estimation, but cannot vote" in {
-      roomRef ! RequestStartEstimation("spectator", "new-task", "20150102T13:37:00")
+      roomRef ! RequestStartEstimation("spectator",
+                                       "new-task",
+                                       "20150102T13:37:00")
 
       val check: PartialFunction[Any, Boolean] = {
         case RequestStartEstimation("spectator", "new-task", _, _) => true
@@ -288,5 +297,4 @@ class PokerRoomActorTest
       spectator.expectMsgPF(500 millis)(check)
     }
   }
-
 }
