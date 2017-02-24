@@ -24,6 +24,7 @@ type alias User =
     { name : String
     , isSpectator : Bool
     , hasEstimated : Bool
+    , showCats : Bool
     , estimation : Maybe String
     }
 
@@ -80,6 +81,7 @@ init =
 type Msg
     = SetUserName String
     | SetSpectator Bool
+    | SetShowCats Bool
     | SetRoomId String
     | SetNewTaskName String
     | JoinRoom
@@ -108,4 +110,4 @@ emptyTask =
 
 emptyUser : User
 emptyUser =
-    (User "" False False Nothing)
+    (User "" False False True Nothing)

@@ -38,7 +38,7 @@ landingPageContent model =
             []
         , label
             [ for "isSpectator"
-            , class "block col-12 mb3"
+            , class "block col-12"
             ]
             [ input
                 [ id "isSpectator"
@@ -48,6 +48,19 @@ landingPageContent model =
                 ]
                 []
             , text "Join as spectator"
+            ]
+        , label
+            [ for "showCats"
+            , class "block col-12 mb3"
+            ]
+            [ input
+                [ id "showCats"
+                , type_ "checkbox"
+                , checked model.user.showCats
+                , onCheck SetShowCats
+                ]
+                []
+            , text "Show me cats!"
             ]
         , button
             [ class "h4 btn btn-primary right"
