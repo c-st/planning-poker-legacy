@@ -23,7 +23,7 @@ unit_test:
 publish_to_registry:
   stage: publish
   script:
-    - docker push registry.stangier.io/planningpoker/planningpoker:backend:${CI_PI
+    - docker push registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID}
   only:
     - master
 
@@ -32,6 +32,6 @@ run_on_docker:
   script:
     - docker stop planningpoker || true
     - docker rm planningpoker || true
-    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' registry.stangier.io/planningpoker/planningpoker:backend:${CI_PI run
+    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID} run
   only:
     - master
