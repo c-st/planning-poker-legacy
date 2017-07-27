@@ -7,7 +7,7 @@ stages:
 
 before_script:
   - docker info
-  - echo echo "Running pipeline for $CI_PIPELINE_ID"
+  - echo "Running pipeline for $CI_PIPELINE_ID"
 
 build_image:
   stage: build
