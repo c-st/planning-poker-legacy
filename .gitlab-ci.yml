@@ -32,6 +32,6 @@ run_on_docker:
   script:
     - docker stop planningpoker || true
     - docker rm planningpoker || true
-    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID} run
+    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' --label=traefik.backend=planningpoker --label=traefik.frontend.rule=Host:planningpoker.cc --label=traefik.enable=true --label=traefik.port=8080 registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID} run
   only:
     - master
