@@ -13,7 +13,7 @@ build_image:
   stage: build
   script:
     - docker build -t planningpoker:${CI_PIPELINE_ID} ./
-    - docker tag planningpoker:${CI_PIPELINE_ID} registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID}
+    - docker tag planningpoker:${CI_PIPELINE_ID} images.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID}
 
 unit_test:
   stage: test
@@ -23,7 +23,7 @@ unit_test:
 publish_to_registry:
   stage: publish
   script:
-    - docker push registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID}
+    - docker push images.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID}
   only:
     - master
 
@@ -32,6 +32,6 @@ run_on_docker:
   script:
     - docker stop planningpoker || true
     - docker rm planningpoker || true
-    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' --label=traefik.backend=planningpoker --label=traefik.frontend.rule=Host:planningpoker.cc --label=traefik.enable=true --label=traefik.port=8080 registry.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID} run
+    - docker run -d --name=planningpoker -e VIRTUAL_HOST='planningpoker.cc' --label=traefik.backend=planningpoker --label=traefik.frontend.rule=Host:planningpoker.cc --label=traefik.enable=true --label=traefik.port=8080 images.stangier.io/planningpoker/planningpoker:${CI_PIPELINE_ID} run
   only:
     - master
