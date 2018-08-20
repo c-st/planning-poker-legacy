@@ -59,8 +59,7 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging {
                                           actorRef)
       participants = updatedUsers._1
       spectators = updatedUsers._2
-      log.info(
-        s"[$roomId] User $name joined room during an ongoing estimation (spectator: $isSpectator).")
+      log.info(s"[$roomId] User $name joined room during an ongoing estimation (spectator: $isSpectator).")
 
     case UserLeft(name, _) => {
       val updatedUsers = handleUserLeft(participants, spectators, name)
@@ -82,11 +81,10 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging {
       } else if (taskName == currentTask) {
         estimations = insertEstimation(taskName, (name, estimation))
         broadcast(UserHasEstimated(name, taskName))
-        log.info(
-          s"[$roomId] User $name estimated $estimation for $currentTask")
+        log.info(s"[$roomId] User $name estimated $estimation for $currentTask")
+
         if (outstandingEstimations(taskName).isEmpty) {
-          context.become(
-            finishedEstimating(currentTask, estimationStart, DateTime.now))
+          context.become(finishedEstimating(currentTask, estimationStart, DateTime.now))
         }
       } else {
         log.info(
@@ -128,11 +126,9 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging {
         log.info(s"[$roomId] cannot save estimate. User is spectator.")
       } else if (taskName == task) {
         estimations = insertEstimation(taskName, (name, estimation))
-        log.info(
-          s"[$roomId] User $name estimated $estimation for $task (has changed his mind)")
+        log.info(s"[$roomId] User $name estimated $estimation for $task (has changed their mind)")
       } else {
-        log.info(
-          s"[$roomId] cannot save estimate for $taskName. Current task is $task")
+        log.info(s"[$roomId] cannot save estimate for $taskName. Current task is $task")
       }
     }
 
@@ -212,8 +208,7 @@ class PokerRoomActor(roomId: String) extends Actor with ActorLogging {
     estimations.getOrElse(currentTask, Map.empty[String, String])
 
   private def outstandingEstimations(currentTask: String): UserMap =
-    participants.filter(p =>
-      !currentEstimations(currentTask).keys.toList.contains(p._1))
+    participants.filter(p => !currentEstimations(currentTask).keys.toList.contains(p._1))
 
   private def insertEstimation(currentTask: String,
                                estimation: (String, String)): Estimations = {

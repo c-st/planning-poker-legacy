@@ -10,7 +10,8 @@ object PlanningPokerService {
     pathPrefix("poker" / """[a-zA-Z0-9]{2,32}""".r) { roomId =>
       parameters('name, 'spectator ? false) { (userName, isSpectator) =>
         handleWebSocketMessages(
-          PokerRooms.findOrCreate(roomId).websocketFlow(userName, isSpectator))
+          PokerRooms.findOrCreate(roomId).websocketFlow(userName, isSpectator)
+        )
       }
     }
 }

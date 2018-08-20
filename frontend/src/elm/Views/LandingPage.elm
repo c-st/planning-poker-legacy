@@ -63,7 +63,7 @@ landingPageContent model =
             , text "Show me cats!"
             ]
         , button
-            [ class "h4 btn btn-primary right"
+            [ class "h4 btn btn-primary right bg-black"
             , type_ "submit"
             ]
             [ text "Join" ]

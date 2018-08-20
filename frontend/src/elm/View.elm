@@ -6,14 +6,22 @@ import Html.Attributes exposing (..)
 import Views.LandingPage exposing (landingPageContent)
 import Views.PokerRoomPage exposing (planningPokerPageContent)
 
+ccLogoImg : Html Msg
+ccLogoImg =
+    img [ src "static/img/cc-logo-white.png"
+        , style [( "width", "30%" ), ("text-align", "center"), ("margin-bottom", "40px") ]] []
+        
 
 view : Model -> Html Msg
 view model =
     case model.activePage of
         LandingPage ->
             div [ class "flex flex-column full-height m0 p0" ]
-                [ header [ class "px3 py4 center white p3 border-silver border-bottom bg-blue" ]
-                    [ h1 [ class "m0 h0-responsive mt2 mb0 bold" ] [ text "Planning Poker" ]
+                [ header [ class "px3 py4 center white p3 border-silver border-bottom bg-black" ]
+                    [ h1 [ class "m0 h0-responsive mt2 mb0 bold" ] [ 
+                        ccLogoImg
+                        , br [] []
+                        , text "Planning Poker" ]
                     ]
                 , main_
                     [ class "flex-auto" ]

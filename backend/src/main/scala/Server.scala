@@ -7,8 +7,8 @@ import services.PlanningPokerService
 import scala.util.{Failure, Success}
 
 object Server extends App {
-  implicit val actorSystem = ActorSystem("akka-system")
-  implicit val flowMaterializer = ActorMaterializer()
+  implicit val actorSystem: ActorSystem = ActorSystem("akka-system")
+  implicit val flowMaterializer: ActorMaterializer = ActorMaterializer()
 
   val config = actorSystem.settings.config
   val interface = config.getString("app.interface")
@@ -26,9 +26,11 @@ object Server extends App {
   import actorSystem.dispatcher
 
   val binding = Http().bindAndHandle(route, interface, port)
+
   binding.onComplete {
-    case Success(binding) =>
+    case Success(_) =>
       println(s"Server is now running at http://$interface:$port")
+
     case Failure(e) =>
       println(s"Binding failed with ${e.getMessage}")
       actorSystem.terminate()
