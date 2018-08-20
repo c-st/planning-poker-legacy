@@ -7,6 +7,9 @@ import Model exposing (Model, Msg, Health, HealthStatus(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
+ccLogoSmall : Html Msg
+ccLogoSmall =
+    img [ src "../static/img/cc-logo-small.png" ] []
 
 planningPokerPageContent : Model -> Html Msg
 planningPokerPageContent model =
@@ -15,8 +18,8 @@ planningPokerPageContent model =
             model.health
     in
         div [ class "flex flex-column full-height m0 p0 " ]
-            [ header [ class "white mt0 p1 border-silver border-bottom bg-blue mb1" ]
-                [ h1 [ class "m0 h0-responsive mt0 mb0 bold" ] [ text "Planning Poker" ]
+            [ header [ class "white mt0 p1 border-silver border-bottom bg-black mb1" ]
+                [ h1 [ class "m0 h0-responsive mt0 mb0 bold" ] [ ccLogoSmall, text " Planning Poker" ]
                 ]
             , main_ [ class "md-flex flex-auto container" ]
                 [ section [ class "md-flex sm-col sm-col-2 flex-column" ]
