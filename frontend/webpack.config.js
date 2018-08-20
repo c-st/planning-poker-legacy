@@ -94,7 +94,7 @@ if (isProd === true) {
             rules: [{
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
-                use: 'elm-webpack-loader'
+                use: 'elm-webpack-loader?pathToMake=/usr/bin/elm-make'
             }, {
                 test: /\.(css|scss)$/,
                 use: ExtractTextPlugin.extract({
