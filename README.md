@@ -1,5 +1,10 @@
+
+> ⚠️ Please note:
+>
+> Although this repository is still deployed at [planningpoker.cc](https://planningpoker.cc) at the moment it is considered deprecated. Ongoing development is taking place here: [Planningpoker serverless](https://github.com/c-st/planningpoker).
+
+
 # Planning poker
-==============
 
 ## Getting started
 
