@@ -1,7 +1,7 @@
 
 > ⚠️ Please note:
 >
-> This repository is considered deprecated. Ongoing development is taking place here: [Planningpoker](https://github.com/c-st/planningpoker-backend).
+> This repository is considered deprecated. Ongoing development is taking place here: [Planningpoker](https://github.com/c-st/planning-poker-backend/).
 
 
 # Planning poker
